@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 // eslint-disable-next-line react/prop-types
 const AdminEditDept = ({ deptData, onEdit, onCancel }) => {
   const [editedDeptData, setEditedDeptData] = useState({
-    id: deptData.id,
+    id: deptData.id,  
     department: deptData.department,
     hod: deptData.hod,
   });

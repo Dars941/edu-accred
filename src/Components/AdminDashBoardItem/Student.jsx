@@ -1,42 +1,61 @@
-// import {from 'react-icons/bs';
-import { useState } from 'react';
-import AdminCreateStudent from '../PopUpView/AdminPop/AdminStudentPop/AdminCreateStudent';
+// Student.js
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import AdminEditStudent from '../PopUpView/AdminPop/AdminStudentPop/AdminEditStudent';
+import AdminCreateStudent from '../PopUpView/AdminPop/AdminStudentPop/AdminCreateStudent';
 
 const Student = () => {
   const [editStudentPopBtn, setEditStudentPopBtn] = useState(false);
   const [addStudentPopBtn, setAddStudentPopBtn] = useState(false);
-  const [tableData, setTableData] = useState([
-    { id: 1, name: 'A', phone: '123456789', department: 'CSE', batch: '2020' },
-    { id: 2, name: 'S', phone: '123456789', department: 'CSE', batch: '2020' },
-    // ... other student data
-  ]);
+  const [tableData, setTableData] = useState([]);
   const [editedStudentData, setEditedStudentData] = useState(null);
 
   const getRowColor = (index) => {
     return index % 2 === 0 ? 'bg-text-hover-bg' : '';
   };
 
-  const handleEdit = (editedData) => {
-    setTableData((prevData) =>
-      prevData.map((item) => (item.id === editedData.id ? editedData : item))
-    );
-
-    setEditStudentPopBtn(false); // Close the popup when Save is clicked
+  const fetchStudentData = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/Student/student/');
+      setTableData(response.data);
+    } catch (error) {
+      console.error('Error fetching student data:', error);
+    }
   };
 
-  const handleDelete = (row) => {
-    const updatedData = tableData.filter((item) => item.id !== row.id);
-    setTableData(updatedData);
-    console.log(`Deleted student with ID ${row.id}`);
+  useEffect(() => {
+    fetchStudentData();
+  }, []);
+
+  const handleEdit = async (editedStudentData) => {
+    try {
+      await axios.put(`http://127.0.0.1:8000/Student/student/${editedStudentData.id}/`, editedStudentData);
+      fetchStudentData();
+      setEditStudentPopBtn(false); // Close the popup when Save is clicked
+    } catch (error) {
+      console.error('Error editing student:', error);
+    }
   };
 
-  const handleAddStudent = (newStudent) => {
-    const newId = tableData.length > 0 ? Math.max(...tableData.map((item) => item.id)) + 1 : 1;
-    const studentWithId = { ...newStudent, id: newId };
-    setTableData((prevData) => [...prevData, studentWithId]);
-    console.log('Added new student:', studentWithId);
-    setAddStudentPopBtn(false); // Close the popup when Add is clicked
+  const handleDelete = async (row) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/Student/student/${row.id}/`);
+      fetchStudentData();
+      console.log(`Deleted student with ID ${row.id}`);
+    } catch (error) {
+      console.error('Error deleting student:', error);
+    }
+  };
+
+  const handleAddStudent = async (newStudent) => {
+    try {
+      await axios.post('http://127.0.0.1:8000/Student/student/', newStudent);
+      fetchStudentData();
+      console.log('Added new student:', newStudent);
+      setAddStudentPopBtn(false); // Close the popup when Add is clicked
+    } catch (error) {
+      console.error('Error adding new student:', error);
+    }
   };
 
   const handleCancelAddStudent = () => {
@@ -57,7 +76,7 @@ const Student = () => {
       <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">
           <tr className="rounded-lg ">
-            <th className="px-4 py-2 font-semibold">SI.no</th>
+            {/* <th className="px-4 py-2 font-semibold">SI.no</th> */}
             <th className="px-4 py-2 font-semibold">Name</th>
             <th className="px-4 py-2 font-semibold">Phone No:</th>
             <th className="px-4 py-2 font-semibold">Department</th>
@@ -68,7 +87,7 @@ const Student = () => {
         <tbody className="font-sans ">
           {tableData.map((row, index) => (
             <tr key={row.id} className={getRowColor(index)}>
-              <td className="px-4 py-2 font-light text-[20px]  ">{row.id}</td>
+              {/* <td className="px-4 py-2 font-light text-[20px]  ">{row.id}</td> */}
               <td className="px-4 py-2 font-light text-[20px]">{row.name}</td>
               <td className="px-4 py-2 font-light text-[20px]">{row.phone}</td>
               <td className="px-4 py-2 font-light text-[20px]">{row.department}</td>

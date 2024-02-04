@@ -1,7 +1,7 @@
 
 import NavBar from '../Components/NavBar/StudentNavBar';
 import SideBar from '../Components/SideBar/StudentSideBar'
-// import { Outlet } from 'react-router-dom';
+ import { Outlet } from 'react-router-dom';
 import Subject from '../Components/StudentDashBoardItem/Subject';
 const StudentDashBoard = () => {
   return (
@@ -9,7 +9,7 @@ const StudentDashBoard = () => {
       <NavBar />
       <div className='flex'>
         <SideBar />
-        <Subject></Subject>
+        <Outlet />    
       </div>
     </>
   );

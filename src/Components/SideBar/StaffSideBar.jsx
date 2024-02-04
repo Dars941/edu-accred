@@ -14,8 +14,8 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'subject' },
-    { title: 'studentdel' },
+    { title: 'staffadvisor' },
+    { title: 'nba-report' },
     // { title: 'Staff advisor' },
     // { title: 'student' },
      { title: 'logout' },

@@ -2,7 +2,7 @@ import React from 'react'
 
 const nbareport = () => {
   return (
-    <div>nbareport</div>
+    <div>fs</div>
   )
 }
 

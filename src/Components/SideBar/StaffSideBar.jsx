@@ -1,40 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
-//  
-import { TiGroupOutline } from "react-icons/ti";
- import { FcDepartment } from "react-icons/fc";
-// import { FaPersonChalkboard } from "react-icons/fa6";
-// import { PiStudent } from "react-icons/pi";
-import { IoIosLogOut } from "react-icons/io";
-import { useNavigate } from 'react-router-dom';
-
+import { TiGroupOutline } from 'react-icons/ti';
+import { FcDepartment } from 'react-icons/fc';
+import { IoIosLogOut } from 'react-icons/io';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SideBar = () => {
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'staffadvisor' },
-    { title: 'nba-report' },
-    // { title: 'Staff advisor' },
-    // { title: 'student' },
-     { title: 'logout' },
+    { title: 'staffadvisor', icon: <TiGroupOutline key='Staff' /> },
+    { title: 'nbaReport', icon: <FcDepartment key='Department' /> },
+    { title: 'logout', icon: <IoIosLogOut key='logout' /> },
   ];
 
-  const Icons = [
-    <TiGroupOutline key='Staff'/>,
-     <FcDepartment key='Department'/>,
-    // <FaPersonChalkboard key="Staff Advisor" />,
-    // <PiStudent key="student" />,
-    <IoIosLogOut key="logout" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-  ];
+  const toggleOpen = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
 
-  let containerClass = 'bg-white p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  useEffect(() => {
+    if (!open) {
+      // Delayed execution to ensure state change takes effect
+      const timeoutId = setTimeout(() => {
+        toggleOpen();
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open]);
+
+  let containerClass =
+    'bg-white p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {
@@ -43,31 +40,36 @@ const SideBar = () => {
   containerClass += ' relative duration-300';
 
   const handleMenuItemClick = (path) => {
-    navigate(`/${path}`);
+    navigate(`/staffdashboard/${path}`);
+    toggleOpen(); // Close the sidebar after navigation
   };
 
   return (
-    <div className=" md:flex">
+    <div className='md:flex'>
       <div className={containerClass}>
         <AiOutlineArrowLeft
-          onClick={() => {
-            setOpen(!open);
-          }}
+          onClick={toggleOpen}
           className={`sm :  bg-white text-dark-purple text-3xl rounded-full absolute md : hidden -right-3 top-9 border border-dark-purple cursor-pointer ${!open && 'rotate-180'}`}
         ></AiOutlineArrowLeft>
         <div></div>
-        <ul className="pb-3 pt-3 ">
-          {Menus.map((menuitem, index) => (
+        <ul className='pb-3 pt-3 '>
+          {Menus.map((menuitem) => (
             <li
-              key={index}
-              className="text-light-grey  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color"
+              key={menuitem.title}
+              className='text-light-grey  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color'
               onClick={() => handleMenuItemClick(menuitem.title.toLowerCase())}
             >
-              <span className="text-l block float-left text-4xl">{Icons[index]}</span>
-              <span className={`${!open && 'hidden '}`}>{menuitem.title}</span>
+              <Link
+                to={`/${menuitem.title.toLowerCase()}`}
+                className='text-l block float-left text-4xl'
+              >
+                {menuitem.icon}
+              </Link>
+              <span className={`${!open && 'hidden '}`}>
+                {menuitem.title}
+              </span>
             </li>
           ))}
-          <li className=''></li>
         </ul>
       </div>
     </div>

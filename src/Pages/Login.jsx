@@ -15,8 +15,14 @@ function Login() {
       navigate("/");
     } else if (username === "student" && password === "student") {
       // Navigate to the student dashboard
-      navigate("/studentdashboard");
-    } else {
+      navigate("/studentdashboard"); 
+      
+    }
+    else if (username === "staff" && password === "staff") {
+      // Navigate to the student dashboard
+      navigate("/staffdashboard");
+    }
+      else {
       // Handle incorrect credentials (you can show an error message or take other actions)
       console.log("Incorrect username or password");
     }

@@ -43,7 +43,8 @@ const SideBar = () => {
   containerClass += ' relative duration-300';
 
   const handleMenuItemClick = (path) => {
-    navigate(`/${path}`);
+    navigate(`/studentdashboard/${path}`);
+    setOpen(false);
   };
 
   return (

@@ -11,10 +11,11 @@ import Subject from './Components/StudentDashBoardItem/Subject';
 import Studentdel from './Components/StudentDashBoardItem/Student';
 import StaffDashBoard from './Pages/StaffDashBoard';
 import StaffAdvisor from './Components/StaffDashBoardItem/StaffAdvisor';
-import NbaReport from './Components/StaffDashBoardItem/nbareport';
+import NbaReport from './Components/StaffDashBoardItem/nbareport'; 
+import Syllabus from './Components/StaffDashBoardItem/syllabus';
 
 const App = () => {
-  const currentUser = true;
+  const currentUser = false;
 
   const ProtectedRoute = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
@@ -47,11 +48,15 @@ const App = () => {
 
         <Route path="staffdashboard" element={<StaffDashBoard />}>
           <Route index element={<Navigate to="staffadvisor" />} />
-          <Route path="staffadvisor" element={<StaffAdvisor />} />
+          <Route path="Mission vision" element={<StaffAdvisor />} /> 
+          <Route path="syllabus" element={<Syllabus />} />
+
           <Route path="nbareport" element={<NbaReport />} />
         </Route>
 
         <Route path="logout" element={<Login />} />
+        <Route path="staffdashboard/logout" element={<Login />} />
+        <Route path="studentdashboard/logout" element={<Login />} />
       </Routes>
     </Router>
   );

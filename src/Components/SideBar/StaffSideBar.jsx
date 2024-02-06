@@ -10,8 +10,22 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'staffadvisor', icon: <TiGroupOutline key='Staff' /> },
+     { title: 'Mission vision', icon: <TiGroupOutline key='Staff' /> },
     { title: 'nbaReport', icon: <FcDepartment key='Department' /> },
+    { title: 'syllabus', icon: <FcDepartment key='syllabus' /> },
+    { title: 'Timetable', icon: <FcDepartment key='Timetable' /> }, 
+    { title: 'student list', icon: <FcDepartment key='student list' /> }, 
+    { title: 'CO,PO, BL mapping', icon: <FcDepartment key='co,po,bl' /> }, 
+    { title: 'Acedemic calender', icon: <FcDepartment key='acedemic calender' /> }, 
+    { title: 'course plan', icon: <FcDepartment key='course plan' /> }, 
+    { title: 'TAE parameter', icon: <FcDepartment key='TAE parameter' /> }, 
+    { title: 'Course Coverage', icon: <FcDepartment key='Course Coverge' /> }, 
+    { title: 'Attendence Register', icon: <FcDepartment key='Attendence Register' /> }, 
+    { title: 'Prevous Univercity Qp ', icon: <FcDepartment key='PUQP' /> },  
+    { title: 'Assignment 1 Qp ', icon: <FcDepartment key='Assign1' /> },  
+    { title: 'internal test Qp ', icon: <FcDepartment key='int test qp' /> },  
+
+
     { title: 'logout', icon: <IoIosLogOut key='logout' /> },
   ];
 

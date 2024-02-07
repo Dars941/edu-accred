@@ -15,7 +15,7 @@ import NbaReport from './Components/StaffDashBoardItem/nbareport';
 import Syllabus from './Components/StaffDashBoardItem/syllabus';
 
 const App = () => {
-  const currentUser = false;
+  const currentUser = true;
 
   const ProtectedRoute = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
@@ -48,7 +48,7 @@ const App = () => {
 
         <Route path="staffdashboard" element={<StaffDashBoard />}>
           <Route index element={<Navigate to="staffadvisor" />} />
-          <Route path="Mission vision" element={<StaffAdvisor />} /> 
+          <Route path="staffadvisor" element={<StaffAdvisor />} /> 
           <Route path="syllabus" element={<Syllabus />} />
 
           <Route path="nbareport" element={<NbaReport />} />

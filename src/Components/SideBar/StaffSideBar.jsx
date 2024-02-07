@@ -10,7 +10,7 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-     { title: 'Mission vision', icon: <TiGroupOutline key='Staff' /> },
+     { title: 'staffadvisor', icon: <TiGroupOutline key='Staff' /> },
     { title: 'nbaReport', icon: <FcDepartment key='Department' /> },
     { title: 'syllabus', icon: <FcDepartment key='syllabus' /> },
     { title: 'Timetable', icon: <FcDepartment key='Timetable' /> }, 

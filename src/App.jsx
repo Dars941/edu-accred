@@ -13,6 +13,7 @@ import StaffDashBoard from './Pages/StaffDashBoard';
 import StaffAdvisor from './Components/StaffDashBoardItem/StaffAdvisor';
 import NbaReport from './Components/StaffDashBoardItem/nbareport'; 
 import Syllabus from './Components/StaffDashBoardItem/syllabus';
+import Scheme from './Components/StaffDashBoardItem/Branch/Scheme';
 
 const App = () => {
   const currentUser = true;
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="syllabus" element={<Syllabus />} />
 
           <Route path="nbareport" element={<NbaReport />} />
+          <Route path="Branch/Scheme" element={<Scheme />} />
         </Route>
 
         <Route path="logout" element={<Login />} />

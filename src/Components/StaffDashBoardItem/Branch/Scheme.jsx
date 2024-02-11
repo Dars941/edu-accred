@@ -12,10 +12,10 @@ const Scheme = () => {
 
   // Object containing download links for each department
   const departmentDownloadLinks = {
-    'ELECTRICAL AND ELECTRONICS ENGINEERING': ['link1', 'link2', 'link3', 'link4'],
-    'MECHANICAL ENGINEERING': ['link5', 'link6', 'link7', 'link8'],
-    'CIVIL ENGINEERING': ['link9', 'link10', 'link11', 'link12'],
-    'ELECTRONICS AND COMMUNICATION ENGINEERING': ['link13', 'link14', 'link15', 'link16'],
+    'ELECTRICAL AND ELECTRONICS ENGINEERING': ['link1', 'link2', 'link3', 'https://docs.google.com/uc?export=download&id=1gjb3WvNDScizqJsQ72eIFkU62zYvySmG'],
+    'MECHANICAL ENGINEERING': ['link5', 'link6', 'link7', 'https://docs.google.com/uc?export=download&id=1Xjf1kAPan2qC85kSpGvc_Vg7RZyBJYun'],
+    'CIVIL ENGINEERING': ['link9', 'link10', 'link11', 'https://docs.google.com/uc?export=download&id=1Y7a6tkdxEgoFZ-QQMGVGRM1tb4NTzTRu'],
+    'ELECTRONICS AND COMMUNICATION ENGINEERING': ['link13', 'link14', 'link15', 'https://docs.google.com/uc?export=download&id=1sIo4Pf11mr-PCN0XZs7MM1HIETzNFz3K'],
     'COMPUTER SCIENCE AND   ENGINEERING': ['link17', 'link18', 'link19', 'https://docs.google.com/uc?export=download&id=1ach8YwQZbBpRPuPwt2vFEKh4QhGvKVPD'],
   };
 

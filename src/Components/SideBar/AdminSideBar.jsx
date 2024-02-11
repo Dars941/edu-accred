@@ -17,6 +17,10 @@ const SideBar = () => {
     { title: 'department' },
     // { title: 'Staff advisor' },
     { title: 'student' },
+    { title: 'studentlist' },
+    { title: 'batchlist' },
+    { title: 'departmentlist' }, 
+    { title: 'staflist' }, 
     { title: 'logout' },
   ];
 

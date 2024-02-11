@@ -14,7 +14,10 @@ import StaffAdvisor from './Components/StaffDashBoardItem/StaffAdvisor';
 import NbaReport from './Components/StaffDashBoardItem/nbareport'; 
 import Syllabus from './Components/StaffDashBoardItem/syllabus';
 import Scheme from './Components/StaffDashBoardItem/Branch/Scheme';
-
+import Studentlist from './Components/AdminDashBoardItem/Studentlist';
+import Batchlist from './Components/AdminDashBoardItem/Batchlist'
+import Departmentlist from './Components/AdminDashBoardItem/Departmentlist';
+import Stafflist from './Components/AdminDashBoardItem/Stafflist'
 const App = () => {
   const currentUser = true;
 
@@ -39,6 +42,10 @@ const App = () => {
           <Route path="staff" element={<Staff />} />
           <Route path="department" element={<Department />} />
           <Route path="student" element={<Student />} />
+          <Route path="studentlist" element={<Studentlist />} />
+          <Route path="batchlist" element={<Batchlist />} />
+          <Route path="departmentlist" element={<Departmentlist />} />
+          <Route path="staflist" element={<Stafflist />} />
         </Route>
 
         <Route path="studentdashboard" element={<StudentDashboard />}>

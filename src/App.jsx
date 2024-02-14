@@ -18,6 +18,7 @@ import Studentlist from './Components/AdminDashBoardItem/Studentlist';
 import Batchlist from './Components/AdminDashBoardItem/Batchlist'
 import Departmentlist from './Components/AdminDashBoardItem/Departmentlist';
 import Stafflist from './Components/AdminDashBoardItem/Stafflist'
+import COmapping from './Components/StaffDashBoardItem/COmapping';
 const App = () => {
   const currentUser = true;
 
@@ -62,6 +63,7 @@ const App = () => {
           <Route path="nbareport" element={<NbaReport />} />
           <Route path="Branch/Scheme" element={<Scheme />} /> 
           <Route path="studentlist" element={<Studentlist />} />
+          <Route path="CO mapping" element={<COmapping />} />
         </Route>
 
         <Route path="logout" element={<Login />} />

@@ -60,7 +60,8 @@ const App = () => {
           <Route path="syllabus" element={<Syllabus />} />
 
           <Route path="nbareport" element={<NbaReport />} />
-          <Route path="Branch/Scheme" element={<Scheme />} />
+          <Route path="Branch/Scheme" element={<Scheme />} /> 
+          <Route path="studentlist" element={<Studentlist />} />
         </Route>
 
         <Route path="logout" element={<Login />} />

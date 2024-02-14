@@ -14,7 +14,7 @@ const SideBar = () => {
     { title: 'nbaReport', icon: <FcDepartment key='Department' /> },
     { title: 'syllabus', icon: <FcDepartment key='syllabus' /> },
     { title: 'Timetable', icon: <FcDepartment key='Timetable' /> }, 
-    { title: 'student list', icon: <FcDepartment key='student list' /> }, 
+    { title: 'studentlist', icon: <FcDepartment key='student list' /> }, 
     { title: 'CO,PO, BL mapping', icon: <FcDepartment key='co,po,bl' /> }, 
     { title: 'Acedemic calender', icon: <FcDepartment key='acedemic calender' /> }, 
     { title: 'course plan', icon: <FcDepartment key='course plan' /> }, 

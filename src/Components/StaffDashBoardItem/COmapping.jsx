@@ -23,7 +23,9 @@ function COmapping() {
         console.error('Error fetching data from Supabase:', error.message);
         setUploadStatus('Error fetching data. Please try again.');
       } else {
-        setExcelData(data);
+        // Convert data to a format compatible with the UI
+        const formattedData = data.map(row => Object.values(row));
+        setExcelData(formattedData);
         setUploadStatus(null);
       }
     } catch (error) {
@@ -46,7 +48,9 @@ function COmapping() {
 
     try {
       const data = await readFile(file);
-      setExcelData(data);
+      // Convert data to a format compatible with the UI
+      const formattedData = data.map(row => Object.values(row));
+      setExcelData(formattedData);
       setTypeError(null);
       setUploadStatus(null);
     } catch (error) {
@@ -76,7 +80,16 @@ function COmapping() {
   // Function to update data in Supabase
   const updateDataInSupabase = async () => {
     try {
-      const { data, error } = await supabase.from('excel_data').upsert(excelData);
+      // Convert data to Supabase format
+      const formattedData = excelData.map(row => {
+        const obj = {};
+        row.forEach((value, index) => {
+          obj[index.toString()] = value;
+        });
+        return obj;
+      });
+
+      const { data, error } = await supabase.from('excel_data').upsert(formattedData);
       if (error) {
         console.error('Error updating data in Supabase:', error.message);
         setUploadStatus('Error updating data. Please try again.');
@@ -119,7 +132,7 @@ function COmapping() {
     // Construct filename based on subject and semester
     const fileName = `${subject}_${semester}.xlsx`;
     // Call function to upload file with constructed filename
-    // uploadFile(fileName);
+    updateDataInSupabase();
   };
 
   return (

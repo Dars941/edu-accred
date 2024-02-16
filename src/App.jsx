@@ -18,7 +18,8 @@ import Studentlist from './Components/AdminDashBoardItem/Studentlist';
 import Batchlist from './Components/AdminDashBoardItem/Batchlist'
 import Departmentlist from './Components/AdminDashBoardItem/Departmentlist';
 import Stafflist from './Components/AdminDashBoardItem/Stafflist'
-import COmapping from './Components/StaffDashBoardItem/COmapping';
+import COmapping from './Components/StaffDashBoardItem/COmapping'; 
+import AcedemicCalender from './Components/StaffDashBoardItem/acedemicCalender';
 const App = () => {
   const currentUser = true;
 
@@ -64,6 +65,7 @@ const App = () => {
           <Route path="Branch/Scheme" element={<Scheme />} /> 
           <Route path="studentlist" element={<Studentlist />} />
           <Route path="CO mapping" element={<COmapping />} />
+          <Route path="acedemic calender" element={<AcedemicCalender />} />
         </Route>
 
         <Route path="logout" element={<Login />} />

@@ -13,22 +13,24 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'staff' },
-    { title: 'department' },
-    // { title: 'Staff advisor' },
-    { title: 'student' },
-    { title: 'studentlist' },
-    { title: 'batchlist' },
-    { title: 'departmentlist' }, 
-    { title: 'staflist' }, 
+    // { title: 'staff' },
+    // { title: 'department' },
+    // // { title: 'Staff advisor' },
+    // { title: 'student' },
+    { title: 'student list' },
+    { title: 'batch list' },
+    { title: 'department list' }, 
+    { title: 'staf list' }, 
     { title: 'logout' },
   ];
 
   const Icons = [
+    <PiStudent key="student" />,
+
     <TiGroupOutline key='Staff'/>,
     <FcDepartment key='Department'/>,
     // <FaPersonChalkboard key="Staff Advisor" />,
-    <PiStudent key="student" />,
+    
     <IoIosLogOut key="logout" />,
     <RiDashboardFill key="dashboard" />,
     <RiDashboardFill key="dashboard" />,
@@ -46,7 +48,7 @@ const SideBar = () => {
   containerClass += ' relative duration-300';
 
   const handleMenuItemClick = (path) => {
-    navigate(`/${path}`);
+    navigate(`/admindashboard/${path}`);
   };
 
   return (

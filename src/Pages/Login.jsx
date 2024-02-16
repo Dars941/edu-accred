@@ -12,7 +12,7 @@ function Login() {
     if (username === "admin" && password === "admin") {
       // Navigate to the admin dashboard 
       
-      navigate("/");
+      navigate("/admindashboard");
     } else if (username === "student" && password === "student") {
       // Navigate to the student dashboard
       navigate("/studentdashboard"); 

@@ -7,10 +7,11 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const SideBar = () => {
   const [open, setOpen] = useState(true);
+  const [selectedItem, setSelectedItem] = useState('staffadvisor'); // Default selected item
   const navigate = useNavigate();
 
   const Menus = [
-     { title: 'staffadvisor', icon: <TiGroupOutline key='Staff' /> },
+    { title: 'Mission Vision', icon: <TiGroupOutline key='Staff' /> },
     { title: 'nbaReport', icon: <FcDepartment key='Department' /> },
     { title: 'syllabus', icon: <FcDepartment key='syllabus' /> },
     { title: 'Timetable', icon: <FcDepartment key='Timetable' /> }, 
@@ -24,8 +25,6 @@ const SideBar = () => {
     { title: 'Prevous Univercity Qp ', icon: <FcDepartment key='PUQP' /> },  
     { title: 'Assignment 1 Qp ', icon: <FcDepartment key='Assign1' /> },  
     { title: 'internal test Qp ', icon: <FcDepartment key='int test qp' /> },  
-
-
     { title: 'logout', icon: <IoIosLogOut key='logout' /> },
   ];
 
@@ -45,7 +44,7 @@ const SideBar = () => {
   }, [open]);
 
   let containerClass =
-    'bg-white p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+    'bg-light-blue p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {
@@ -53,8 +52,9 @@ const SideBar = () => {
   }
   containerClass += ' relative duration-300';
 
-  const handleMenuItemClick = (path) => {
-    navigate(`/staffdashboard/${path}`);
+  const handleMenuItemClick = (title) => {
+    setSelectedItem(title); // Update selected item
+    navigate(`/staffdashboard/${title}`);
     toggleOpen(); // Close the sidebar after navigation
   };
 
@@ -70,8 +70,8 @@ const SideBar = () => {
           {Menus.map((menuitem) => (
             <li
               key={menuitem.title}
-              className='text-light-grey  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color'
-              onClick={() => handleMenuItemClick(menuitem.title.toLowerCase())}
+              className={`text-black  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color ${selectedItem === menuitem.title && 'bg-gray-200'}`}
+              onClick={() => handleMenuItemClick(menuitem.title)}
             >
               <Link
                 to={`/${menuitem.title.toLowerCase()}`}

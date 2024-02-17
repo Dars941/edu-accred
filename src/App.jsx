@@ -31,10 +31,11 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} /> 
-        <Route path="/admindashboard/logout" element={<Login />} /> 
-        <Route path="/studentdashboard/logout" element={<Login />} /> 
-        <Route path="/staffdashboard/logout" element={<Login />} /> 
-
+       
+   
+        <Route path="/admindashboard/logout" element={<Navigate to="/" />} />
+        <Route path="/studentdashboard/logout" element={<Navigate to="/" />} />
+        <Route path="/staffdashboard/logout" element={<Navigate to="/" />} />
 
         <Route
           path="/admindashboard"
@@ -51,7 +52,7 @@ const App = () => {
           <Route path="student list" element={<Studentlist />} />
           <Route path="batch list" element={<Batchlist />} />
           <Route path="department list" element={<Departmentlist />} />
-          <Route path="staf list" element={<Stafflist />} />
+          <Route path="staff list" element={<Stafflist />} />
         </Route>
 
         <Route path="studentdashboard" element={<StudentDashboard />}>
@@ -61,8 +62,8 @@ const App = () => {
         </Route>
 
         <Route path="staffdashboard" element={<StaffDashBoard />}>
-          <Route index element={<Navigate to="staffadvisor" />} />
-          <Route path="staffadvisor" element={<StaffAdvisor />} /> 
+          <Route index element={<Navigate to="Mission Vision" />} />
+          <Route path="Mission Vision" element={<StaffAdvisor />} /> 
           <Route path="syllabus" element={<Syllabus />} />
 
           <Route path="nbareport" element={<NbaReport />} />
@@ -73,8 +74,7 @@ const App = () => {
         </Route>
 
         <Route path="logout" element={<Login />} />
-        <Route path="staffdashboard/logout" element={<Login />} />
-        <Route path="studentdashboard/logout" element={<Login />} />
+        
       </Routes>
     </Router>
   );

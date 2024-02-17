@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../../createClent';
-import { v4 as uuid } from 'uuid';
+import * as XLSX from 'xlsx';
 
 const StudentList = () => {
   const [fetchError, setFetchError] = useState(null);
@@ -85,7 +85,7 @@ const StudentList = () => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     try {
       if (addEditStudent === 'add') {
         const newStudentId = Math.floor(Math.random() * 1000000); // Generate random integer ID
@@ -105,7 +105,10 @@ const StudentList = () => {
           throw error;
         }
         console.log('Student added successfully:', data);
-        setStudentList([...studentList, data[0]]);
+        // Ensure data is not null before attempting to access it
+        if (data) {
+          setStudentList([...studentList, data[0]]);
+        }
         handleAddEditClose();
       } else if (addEditStudent === 'edit') {
         const { data, error } = await supabase
@@ -116,13 +119,16 @@ const StudentList = () => {
           throw error;
         }
         console.log('Student edited successfully:', data);
-        const updatedList = studentList.map(student => {
-          if (student.id === selectedStudent.id) {
-            return selectedStudent;
-          }
-          return student;
-        });
-        setStudentList(updatedList);
+        // Ensure data is not null before attempting to access it
+        if (data) {
+          const updatedList = studentList.map(student => {
+            if (student.id === selectedStudent.id) {
+              return selectedStudent;
+            }
+            return student;
+          });
+          setStudentList(updatedList);
+        }
         handleAddEditClose();
       }
     } catch (error) {
@@ -130,10 +136,36 @@ const StudentList = () => {
     }
   };
   
-  
-  
-  
 
+  const handleBulkAdd = async (e) => {
+    const reader = new FileReader();
+    reader.readAsBinaryString(e.target.files[0]);
+    reader.onload = async (e) => {
+      try {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
+
+        // Insert the parsed data into the Supabase table
+        const { data: insertedData, error } = await supabase.from('studentlist').insert(parsedData);
+
+        if (error) {
+          throw error;
+        }
+
+        // Update the local state with the newly inserted data
+        setStudentList([...studentList, ...insertedData]);
+      } catch (error) {
+        if (error.code === '23505') {
+          console.error('Error adding data to Supabase: Data already exists');
+        } else {
+          console.error('Error adding data to Supabase:', error.message);
+        }
+      }
+    };
+  };
 
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
@@ -144,6 +176,19 @@ const StudentList = () => {
       >
         Add
       </button>
+      <button
+        className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
+        onClick={() => document.getElementById('fileInput').click()}
+      >
+        Bulk Add
+      </button>
+      <input
+        id="fileInput"
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleBulkAdd}
+        style={{ display: 'none' }}
+      />
       {fetchError && <p>{fetchError}</p>}
       <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">
@@ -199,13 +244,13 @@ const StudentList = () => {
 
       {/* Add/Edit Student Popup */}
       {addEditStudent && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div className="fixed top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg">
             <h2 className="text-lg font-semibold mb-4">
               {addEditStudent === 'add' ? 'Add Student' : 'Edit Student'}
             </h2>
             {/* Form for adding/editing student */}
-            <form onSubmit={handleSubmit}>
+            <form className='grid grid-cols-3' onSubmit={handleSubmit}>
               <input
                 type="text"
                 placeholder="Name"
@@ -297,20 +342,46 @@ const StudentList = () => {
                 value={selectedStudent.remark}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, remark: e.target.value })}
               />
-              <input
+              {/* <input
                 type="text"
                 placeholder="Batch"
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
                 value={selectedStudent.batch}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, batch: e.target.value })}
-              />
-              <input
+              /> */} 
+               <select
+                value={selectedStudent.batch} 
+                placeholder="Advisor batch "
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, batch: e.target.value })}
+                className="border rounded-lg px-3 py-2 mb-2 w-full"
+              >
+                <option value="">Select Batch</option>
+                <option value="2020-2024">2020-2024</option>
+                <option value="2021-2025">2021-2025</option>
+                <option value="2022-2026">2022-2026</option>
+                <option value="2023-2027">2023-2027</option>
+
+              </select>
+              {/* <input
                 type="text"
                 placeholder="Department"
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
                 value={selectedStudent.dept}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, dept: e.target.value })}
-              />
+              /> */} 
+              <select
+                value={selectedStudent.dept} 
+                placeholder="Department "
+                onChange={(e) => setSelectedStudent({ ...selectedStudent, dept: e.target.value })}
+                className="border rounded-lg px-3 py-2 mb-2 w-full"
+              >
+                <option value="">Select Department</option>
+                <option value="CSE">CSE</option>
+                <option value="EEE">EEE</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+              </select>
               {/* Ensure the value and onChange are set for each field */}
               <button
                 type="button"

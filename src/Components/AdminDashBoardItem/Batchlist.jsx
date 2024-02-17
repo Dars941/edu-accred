@@ -50,7 +50,7 @@ const Batchlist = () => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     try {
       console.log('Submitting form with selectedBatch:', selectedBatch);
       if (addEditBatch === 'add') {
@@ -62,8 +62,10 @@ const Batchlist = () => {
         if (error) {
           throw error;
         }
-        console.log('Batch added successfully:', data);
-        setBatchList([...batchList, data[0]]);
+        if (data) {
+          console.log('Batch added successfully:', data);
+          setBatchList([...batchList, data[0]]);
+        }
         handleAddEditClose();
       } else if (addEditBatch === 'edit') {
         // Handle edit functionality
@@ -72,6 +74,7 @@ const Batchlist = () => {
       console.error('Error adding/editing batch:', error.message);
     }
   };
+  
   
 
   return (

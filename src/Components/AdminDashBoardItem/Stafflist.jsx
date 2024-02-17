@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../../createClent'; // Assuming this is your Supabase client
+import * as XLSX from 'xlsx';
 import { v4 as uuid } from 'uuid';
 
 const Stafflist = () => {
@@ -35,10 +36,7 @@ const Stafflist = () => {
 
   const handleDelete = async (staff) => {
     try {
-      await supabase
-        .from('stafflist')
-        .delete()
-        .eq('id', staff.id);
+      await supabase.from('stafflist').delete().eq('id', staff.id);
       setStaffList(staffList.filter((s) => s.id !== staff.id));
     } catch (error) {
       console.error('Error deleting staff:', error.message);
@@ -51,26 +49,22 @@ const Stafflist = () => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     try {
       console.log('Submitting form with selectedStaff:', selectedStaff);
       if (addEditStaff === 'add') {
         const newStaffId = Math.floor(Math.random() * 1000000); // Generate random integer ID
         const newStaff = { ...selectedStaff, id: newStaffId };
-        const { data, error } = await supabase
-          .from('stafflist')
-          .insert([newStaff]);
+        const { data, error } = await supabase.from('stafflist').insert([newStaff]);
         if (error) {
           throw error;
         }
         console.log('Staff added successfully:', data);
-        setStaffList([...staffList, data[0]]);
+        setStaffList(data ? [...staffList, data[0]] : staffList);
+
         handleAddEditClose();
       } else if (addEditStaff === 'edit') {
-        const { data, error } = await supabase
-          .from('stafflist')
-          .update(selectedStaff)
-          .eq('id', selectedStaff.id);
+        const { data, error } = await supabase.from('stafflist').update(selectedStaff).eq('id', selectedStaff.id);
         if (error) {
           throw error;
         }
@@ -88,19 +82,64 @@ const Stafflist = () => {
       console.error('Error adding/editing staff:', error.message);
     }
   };
-  
+
+  const handleBulkAdd = async (e) => {
+    const reader = new FileReader();
+    reader.readAsBinaryString(e.target.files[0]);
+    reader.onload = async (e) => {
+      try {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
+
+        // Insert the parsed data into the Supabase table
+        const { data: insertedData, error } = await supabase.from('stafflist').insert(parsedData);
+
+        if (error) {
+          throw error;
+        }
+
+        // Update the local state with the newly inserted data
+        setStaffList([...staffList, ...insertedData]);
+      } catch (error) {
+        if (error.code === '23505') {
+          console.error('Error adding data to Supabase: Data already exists');
+        } else {
+          console.error('Error adding data to Supabase:', error.message);
+        }
+      }
+    };
+  };
+
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
       <h2>Staff List</h2>
-      <button
-        onClick={() => {
-          setAddEditStaff('add');
-          setSelectedStaff({ id: null, name: '', dept: '', mobile_number: '', email: '', is_advisor: false, advisor_batch: '' });
-        }}
-        className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
-      >
-        Add
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={() => {
+            setAddEditStaff('add');
+            setSelectedStaff({ id: null, name: '', dept: '', mobile_number: '', email: '', is_advisor: false, advisor_batch: '' });
+          }}
+          className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
+        >
+          Add
+        </button>
+        <button
+          className="bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
+          onClick={() => document.getElementById('fileInput').click()}
+        >
+          <div className="flex"> Bulk.Add</div> 
+        </button>
+        <input
+          id="fileInput"
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={handleBulkAdd}
+          style={{ display: 'none' }}
+        />
+      </div>
       {fetchError && <p>{fetchError}</p>}
       <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">
@@ -154,13 +193,26 @@ const Stafflist = () => {
                 value={selectedStaff.name}
                 onChange={(e) => setSelectedStaff({ ...selectedStaff, name: e.target.value })}
               />
-              <input
+              {/* <input
                 type="text"
                 placeholder="Department"
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
                 value={selectedStaff.dept}
                 onChange={(e) => setSelectedStaff({ ...selectedStaff, dept: e.target.value })}
-              />
+              /> */} 
+               <select
+                value={selectedStaff.dept} 
+                placeholder="Department "
+                onChange={(e) => setSelectedStaff({ ...selectedStaff, dept: e.target.value })}
+                className="border rounded-lg px-3 py-2 mb-2 w-full"
+              >
+                <option value="">Select Department</option>
+                <option value="CSE">CSE</option>
+                <option value="EEE">EEE</option>
+                <option value="ECE">ECE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+              </select>
               <input
                 type="text"
                 placeholder="Mobile Number"
@@ -184,13 +236,26 @@ const Stafflist = () => {
                 />
                 <label className="text-[20px]">Is Advisor</label>
               </div>
-              <input
+              {/* <input
                 type="text"
                 placeholder="Advisor Batch"
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
                 value={selectedStaff.advisor_batch}
                 onChange={(e) => setSelectedStaff({ ...selectedStaff, advisor_batch: e.target.value })}
-              />
+              /> */}
+              <select
+                value={selectedStaff.advisor_batch} 
+                placeholder="Advisor batch "
+                onChange={(e) => setSelectedStaff({ ...selectedStaff, advisor_batch: e.target.value })}
+                className="border rounded-lg px-3 py-2 mb-2 w-full"
+              >
+                <option value="">Select Batch</option>
+                <option value="2020-2024">2020-2024</option>
+                <option value="2021-2025">2021-2025</option>
+                <option value="2022-2026">2022-2026</option>
+                <option value="2023-2027">2023-2027</option>
+
+              </select>
               <div className="flex justify-end">
                 <button
                   type="button"

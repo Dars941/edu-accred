@@ -7,6 +7,8 @@ const Departmentlist = () => {
   const [addEditDept, setAddEditDept] = useState(null); // State to manage add/edit popup
   const [selectedDept, setSelectedDept] = useState({ name: "", hod: "" }); // State to manage selected department for editing
   const [data, setData] = useState([]);
+  const [rerenderFlag, setRerenderFlag] = useState(false); // State variable to trigger re-render
+
   useEffect(() => {
     const fetchDeptList = async () => {
       try {
@@ -23,7 +25,7 @@ const Departmentlist = () => {
       }
     };
     fetchDeptList();
-  }, []);
+  }, [rerenderFlag]); // Include rerenderFlag in the dependency array
 
   const handleEdit = (row) => {
     setSelectedDept(row);
@@ -48,17 +50,22 @@ const Departmentlist = () => {
     e.preventDefault();
     try {
       if (addEditDept === "add") {
+        // Insertion code...
         const { data, error } = await supabase
           .from("department")
           .insert([selectedDept]);
         if (error) {
           throw error;
         }
-        if (data) {
+        console.log("Data added:", data); // Log the newly added data
+        if (data && data.length > 0) {
+          console.log("Previous deptList:", deptList); // Log the previous deptList state
           setDeptList((prevDeptList) => [...prevDeptList, data[0]]);
+          console.log("Updated deptList:", [...deptList, data[0]]); // Log the updated deptList state
         }
         handleAddEditClose(); // Close the popup after successful addition
       } else if (addEditDept === "edit") {
+        // Update code...
         const { data, error } = await supabase
           .from("department")
           .update(selectedDept)
@@ -66,17 +73,29 @@ const Departmentlist = () => {
         if (error) {
           throw error;
         }
-        setDeptList(
-          deptList.map((dept) =>
+        console.log("Data updated:", data); // Log the updated data
+        setDeptList((prevDeptList) =>
+          prevDeptList.map((dept) =>
             dept.id === selectedDept.id ? selectedDept : dept
           )
         );
+        console.log("Updated deptList:", deptList); // Log the updated deptList state
         handleAddEditClose(); // Close the popup after successful edit
       }
+      // Toggle rerenderFlag to force re-render
+      setRerenderFlag((prevFlag) => !prevFlag);
     } catch (error) {
       console.error("Error adding/editing department:", error.message);
+      console.log("Insertion error:", error); // Log the entire error object
     }
   };
+
+
+  
+  
+  
+  
+  
 
   const handleBulkAdd = async (e) => {
     const reader = new FileReader();
@@ -100,6 +119,8 @@ const Departmentlist = () => {
 
         // Update the local state with the newly inserted data
         setDeptList([...deptList, ...insertedData]);
+        // Toggle rerenderFlag to force re-render
+        setRerenderFlag((prevFlag) => !prevFlag);
       } catch (error) {
         if (error.code === "23505") {
           console.error("Error adding data to Supabase: Data already exists");

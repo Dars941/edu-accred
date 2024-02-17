@@ -24,6 +24,7 @@ const StudentList = () => {
     batch: '',
     dept: ''
   });
+  const [rerenderFlag, setRerenderFlag] = useState(false); // New state variable
 
   useEffect(() => {
     const fetchStudentList = async () => {
@@ -43,7 +44,7 @@ const StudentList = () => {
       }
     };
     fetchStudentList();
-  }, []);
+  }, [rerenderFlag]); // Include rerenderFlag in the dependency array
 
   const handleEdit = (student, add = false) => {
     setSelectedStudent(student);
@@ -89,14 +90,14 @@ const StudentList = () => {
     try {
       if (addEditStudent === 'add') {
         const newStudentId = Math.floor(Math.random() * 1000000); // Generate random integer ID
-  
+
         // Check if the generated ID already exists
         const existingStudent = studentList.find(student => student.id === newStudentId);
         if (existingStudent) {
           alert("ID already exists. Please try again.");
           return;
         }
-  
+
         const newStudent = { ...selectedStudent, id: newStudentId };
         const { data, error } = await supabase
           .from('studentlist')
@@ -131,11 +132,12 @@ const StudentList = () => {
         }
         handleAddEditClose();
       }
+      // After adding or editing student, set rerenderFlag to trigger re-render
+      setRerenderFlag(prevFlag => !prevFlag);
     } catch (error) {
       console.error('Error adding/editing student:', error.message);
     }
   };
-  
 
   const handleBulkAdd = async (e) => {
     const reader = new FileReader();
@@ -157,6 +159,8 @@ const StudentList = () => {
 
         // Update the local state with the newly inserted data
         setStudentList([...studentList, ...insertedData]);
+        // After adding students, set rerenderFlag to trigger re-render
+        setRerenderFlag(prevFlag => !prevFlag);
       } catch (error) {
         if (error.code === '23505') {
           console.error('Error adding data to Supabase: Data already exists');

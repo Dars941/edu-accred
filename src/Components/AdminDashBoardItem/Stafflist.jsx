@@ -8,6 +8,7 @@ const Stafflist = () => {
   const [staffList, setStaffList] = useState([]);
   const [addEditStaff, setAddEditStaff] = useState(null);
   const [selectedStaff, setSelectedStaff] = useState({ id: null, name: '', dept: '', mobile_number: '', email: '', is_advisor: false, advisor_batch: '' });
+  const [rerenderFlag, setRerenderFlag] = useState(false); // State variable to trigger re-render
 
   useEffect(() => {
     const fetchStaffList = async () => {
@@ -27,7 +28,7 @@ const Stafflist = () => {
       }
     };
     fetchStaffList();
-  }, []);
+  }, [rerenderFlag]); // Include rerenderFlag in the dependency array
 
   const handleEdit = (staff) => {
     setSelectedStaff(staff);
@@ -38,6 +39,8 @@ const Stafflist = () => {
     try {
       await supabase.from('stafflist').delete().eq('id', staff.id);
       setStaffList(staffList.filter((s) => s.id !== staff.id));
+      // Toggle rerenderFlag to force re-render
+      setRerenderFlag((prevFlag) => !prevFlag);
     } catch (error) {
       console.error('Error deleting staff:', error.message);
     }
@@ -61,8 +64,6 @@ const Stafflist = () => {
         }
         console.log('Staff added successfully:', data);
         setStaffList(data ? [...staffList, data[0]] : staffList);
-
-        handleAddEditClose();
       } else if (addEditStaff === 'edit') {
         const { data, error } = await supabase.from('stafflist').update(selectedStaff).eq('id', selectedStaff.id);
         if (error) {
@@ -76,12 +77,15 @@ const Stafflist = () => {
           return staff;
         });
         setStaffList(updatedList);
-        handleAddEditClose();
       }
+      // Toggle rerenderFlag to force re-render
+      setRerenderFlag((prevFlag) => !prevFlag);
+      handleAddEditClose();
     } catch (error) {
       console.error('Error adding/editing staff:', error.message);
     }
   };
+
 
   const handleBulkAdd = async (e) => {
     const reader = new FileReader();
@@ -103,6 +107,8 @@ const Stafflist = () => {
 
         // Update the local state with the newly inserted data
         setStaffList([...staffList, ...insertedData]);
+        // Toggle rerenderFlag to force re-render
+        setRerenderFlag((prevFlag) => !prevFlag);
       } catch (error) {
         if (error.code === '23505') {
           console.error('Error adding data to Supabase: Data already exists');
@@ -112,7 +118,6 @@ const Stafflist = () => {
       }
     };
   };
-
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
       <h2>Staff List</h2>

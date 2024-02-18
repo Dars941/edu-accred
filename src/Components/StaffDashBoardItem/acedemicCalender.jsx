@@ -66,7 +66,7 @@ function AcedemicCalender() {
   };
 
   return (
-    <div className="w-max px-[2.5rem] bg-gray-100 rounded-lg shadow-lg">
+    <div className="w-full p-[2.5rem] bg-gray-100 rounded-lg shadow-lg">
       <input
         type="file"
         accept=".pdf"

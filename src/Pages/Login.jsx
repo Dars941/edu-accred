@@ -1,28 +1,59 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import backgroundImage from "../assets/bgimg.jpg"; // Import your background image here
-
+import supabase from '../createClent';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // Check username and password
-    if (username === "admin" && password === "admin") {
-      // Navigate to the admin dashboard
-      navigate("/admindashboard");
-    } else if (username === "student" && password === "student") {
-      // Navigate to the student dashboard
-      navigate("/studentdashboard");
-    } else if (username === "staff" && password === "staff") {
-      // Navigate to the staff dashboard
-      navigate("/staffdashboard");
-    } else {
-      // Handle incorrect credentials (you can show an error message or take other actions)
-      console.log("Incorrect username or password");
+  const handleLogin = async () => {
+    try {
+      const { user, error } = await supabase.auth.signInWithPassword({
+        email: username,
+        password: password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Fetch user role from the database
+      const { data, error: roleError } = await supabase
+        .from("users")
+        .select("role")
+        .eq("email", username)
+        .single();
+
+      if (roleError) {
+        throw roleError;
+      }
+
+      const userRole = data.role;
+
+      // Redirect based on user role
+      switch (userRole) {
+        case "admin":
+          navigate("/admindashboard");
+          break;
+        case "student":
+          navigate("/studentdashboard");
+          break;
+        case "staff":
+          navigate("/staffdashboard");
+          break;
+        case "staffadvisor":
+          navigate("/staffadvisordashboard");
+          break;
+        default:
+          console.log("Unknown role");
+          break;
+      }
+    } catch (error) {
+      console.error("Authentication error:", error.message);
     }
   };
+
 
   return (
     <div

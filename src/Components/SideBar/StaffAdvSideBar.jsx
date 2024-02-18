@@ -1,54 +1,50 @@
 import { useState } from 'react';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
-//  
+import { RiDashboardFill } from 'react-icons/ri';
 import { TiGroupOutline } from "react-icons/ti";
- import { FcDepartment } from "react-icons/fc";
-// import { FaPersonChalkboard } from "react-icons/fa6";
-// import { PiStudent } from "react-icons/pi";
+import { FcDepartment } from "react-icons/fc";
+import { PiStudent } from "react-icons/pi";
 import { IoIosLogOut } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 
-
 const SideBar = () => {
   const [open, setOpen] = useState(true);
+  const [selectedItem, setSelectedItem] = useState('student list'); // Default selected item
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'subject' },
-    { title: 'studentdel' },
-    // { title: 'Staff advisor' },
-    // { title: 'student' },
-     { title: 'logout' },
+    { title: 'student list' }, 
+    { title: 'create subject' }, 
+    
+    // { title: 'batch list' },
+    // { title: 'department list' }, 
+    // { title: 'staff list' }, 
+    { title: 'logout' },
   ];
 
   const Icons = [
+    <PiStudent key="student" />,
     <TiGroupOutline key='Staff'/>,
-     <FcDepartment key='Department'/>,
-    // <FaPersonChalkboard key="Staff Advisor" />,
-    // <PiStudent key="student" />,
+    // <FcDepartment key='Department'/>,
     <IoIosLogOut key="logout" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
-    // <RiDashboardFill key="dashboard" />,
+    <RiDashboardFill key="dashboard" />,
   ];
 
-  let containerClass = 'bg-white p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  let containerClass = 'bg-light-red h-[600px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {
-    // containerClass += ' w-20';
+    containerClass += ' w-100';
   }
   containerClass += ' relative duration-300';
 
-  const handleMenuItemClick = (path) => {
-    navigate(`/studentdashboard/${path}`);
-    setOpen(false);
+  const handleMenuItemClick = (path, title) => {
+    setSelectedItem(title); // Update selected item
+    navigate(`/staffadvisordashboard/${path}`);
   };
 
   return (
-    <div className=" md:flex">
+    <div className="md:flex">
       <div className={containerClass}>
         <AiOutlineArrowLeft
           onClick={() => {
@@ -61,8 +57,8 @@ const SideBar = () => {
           {Menus.map((menuitem, index) => (
             <li
               key={index}
-              className="text-light-grey  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color"
-              onClick={() => handleMenuItemClick(menuitem.title.toLowerCase())}
+              className={`text-black  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color ${selectedItem === menuitem.title && 'bg-gray-200'}`}
+              onClick={() => handleMenuItemClick(menuitem.title.toLowerCase(), menuitem.title)}
             >
               <span className="text-l block float-left text-4xl">{Icons[index]}</span>
               <span className={`${!open && 'hidden '}`}>{menuitem.title}</span>

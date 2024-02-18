@@ -5,7 +5,8 @@ const Batchlist = () => {
   const [fetchError, setFetchError] = useState(null);
   const [batchList, setBatchList] = useState([]); // Initialize as empty array
   const [addEditBatch, setAddEditBatch] = useState(null); // State to manage add/edit popup
-  const [selectedBatch, setSelectedBatch] = useState({ id: null, name: '' }); // State to manage selected batch for editing
+  const [selectedBatch, setSelectedBatch] = useState({ id: null, name: '' });
+  const [rerenderFlag, setRerenderFlag] = useState(false); // New state variable for re-rendering
 
   useEffect(() => {
     const fetchBatchList = async () => {
@@ -16,16 +17,16 @@ const Batchlist = () => {
         if (error) {
           throw error;
         }
-        setBatchList(data || []); // Set data to empty array if null
+        setBatchList(data || []);
         setFetchError(null);
       } catch (error) {
         console.error('Error fetching batch list:', error.message);
         setFetchError('Could not fetch data');
-        setBatchList([]); // Set batchList to empty array in case of error
+        setBatchList([]);
       }
     };
     fetchBatchList();
-  }, []);
+  }, [rerenderFlag]); // Include rerenderFlag in the dependency array
 
   const handleEdit = (batch) => {
     setSelectedBatch(batch);
@@ -46,7 +47,7 @@ const Batchlist = () => {
 
   const handleAddEditClose = () => {
     setAddEditBatch(null);
-    setSelectedBatch({ id: null, name: '' }); // Reset selected batch
+    setSelectedBatch({ id: null, name: '' });
   };
 
   const handleSubmit = async (e) => {
@@ -54,11 +55,10 @@ const Batchlist = () => {
     try {
       console.log('Submitting form with selectedBatch:', selectedBatch);
       if (addEditBatch === 'add') {
-        // Remove the "id" field before inserting the batch
         const { id, ...batchWithoutId } = selectedBatch;
         const { data, error } = await supabase
           .from('batchlist')
-          .insert([batchWithoutId]); // Insert the batch without the "id" field
+          .insert([batchWithoutId]);
         if (error) {
           throw error;
         }
@@ -70,13 +70,12 @@ const Batchlist = () => {
       } else if (addEditBatch === 'edit') {
         // Handle edit functionality
       }
+      // After adding or editing batch, set rerenderFlag to trigger re-render
+      setRerenderFlag(prevFlag => !prevFlag);
     } catch (error) {
       console.error('Error adding/editing batch:', error.message);
     }
   };
-  
-  
-
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
       <h2>Batch List</h2>

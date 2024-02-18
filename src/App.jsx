@@ -20,11 +20,14 @@ import Departmentlist from './Components/AdminDashBoardItem/Departmentlist';
 import Stafflist from './Components/AdminDashBoardItem/Stafflist'
 import COmapping from './Components/StaffDashBoardItem/COmapping'; 
 import AcedemicCalender from './Components/StaffDashBoardItem/acedemicCalender';
+import StaffAdvisorDashBoard from './Pages/StaffAdvisorDashBoard';
+import SubjectCreation from './Components/StaffAdvisorDashBoardItem/SubjectCreation' 
 const App = () => {
+
   const currentUser = true;
 
   const ProtectedRoute = ({ children }) => {
-    return currentUser ? children : <Navigate to="/login" />;
+    return currentUser ? children : <Navigate to="/" />;
   };
 
   return (
@@ -36,6 +39,8 @@ const App = () => {
         <Route path="/admindashboard/logout" element={<Navigate to="/" />} />
         <Route path="/studentdashboard/logout" element={<Navigate to="/" />} />
         <Route path="/staffdashboard/logout" element={<Navigate to="/" />} />
+        <Route path="/staffadvisordashboard/logout" element={<Navigate to="/" />} />
+        
 
         <Route
           path="/admindashboard"
@@ -71,6 +76,11 @@ const App = () => {
           <Route path="studentlist" element={<Studentlist />} />
           <Route path="CO mapping" element={<COmapping />} />
           <Route path="acedemic calender" element={<AcedemicCalender />} />
+        </Route> 
+        <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>
+        <Route index element={<Navigate to="student list " />} /> 
+        <Route path="student list" element={<Studentlist />} />
+        <Route path="create subject" element={<SubjectCreation />} />
         </Route>
 
         <Route path="logout" element={<Login />} />
@@ -81,3 +91,4 @@ const App = () => {
 };
 
 export default App;
+

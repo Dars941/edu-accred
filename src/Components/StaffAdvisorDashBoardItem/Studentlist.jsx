@@ -183,7 +183,7 @@ const StudentList = () => {
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
       <h2>Student List</h2>
-      <div className='flex gap-4 '>
+      <div className='flex gap-4  '>
       <button
         onClick={() => handleEdit({}, true)}
         className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 ml-10 text-center p-10 text-[20px] text-white font-normal"
@@ -198,7 +198,7 @@ const StudentList = () => {
         type="file"
         accept=".xlsx, .xls"
         onChange={handleBulkAdd}
-        style={{ display: 'none' }}
+        style={{ display: 'none' }} 
       /> 
       <button
         className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"

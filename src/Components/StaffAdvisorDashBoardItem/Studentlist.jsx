@@ -183,29 +183,29 @@ const StudentList = () => {
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
       <h2>Student List</h2>
-      <div className='flex gap-4  '>
       <button
         onClick={() => handleEdit({}, true)}
-        className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 ml-10 text-center p-10 text-[20px] text-white font-normal"
+        className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
       >
         Add
-      </button>
+      </button> 
+      <div style={{ position: 'relative', display: 'inline-block' ,margin:'2' }}>
+  <input
+    id="fileInput"
+    type="file"
+    accept=".xlsx, .xls"
+    onChange={handleBulkAdd}
+    style={{ position: 'absolute', top: 0, left: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+  />
+  <button
+    className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
+    onClick={() => document.getElementById('fileInput').click()}
+  >
+    Bulk
+  </button>
+</div>
+
       
-      
-      </div>
-      <input
-        id="fileInput"
-        type="file"
-        accept=".xlsx, .xls"
-        onChange={handleBulkAdd}
-        style={{ display: 'none' }} 
-      /> 
-      <button
-        className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
-        onClick={() => document.getElementById('fileInput').click()}
-      >
-        Bulk Add
-      </button>
       {fetchError && <p>{fetchError}</p>}
       <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">

@@ -30,7 +30,7 @@ const SideBar = () => {
     <RiDashboardFill key="dashboard" />,
   ];
 
-  let containerClass = 'bg-light-red h-[600px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  let containerClass = 'bg-light-blue h-[600px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {

@@ -34,11 +34,11 @@ const SideBar = () => {
     // <RiDashboardFill key="dashboard" />,
   ];
 
-  let containerClass = 'bg-white p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  let containerClass = 'bg-light-blue p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {
-    // containerClass += ' w-20';
+     containerClass += ' w-[17rem] max-h-screen';
   }
   containerClass += ' relative duration-300';
 
@@ -61,11 +61,11 @@ const SideBar = () => {
           {Menus.map((menuitem, index) => (
             <li
               key={index}
-              className="text-light-grey  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color"
+              className="text-black  flex pl-[30px] items-center text-sm gap-x-4 cursor-pointer p-2 hover:bg-text-hover-bg mt-2 rounded-lg hover:text-text-hover-color"
               onClick={() => handleMenuItemClick(menuitem.title.toLowerCase())}
             >
-              <span className="text-l block float-left text-4xl">{Icons[index]}</span>
-              <span className={`${!open && 'hidden '}`}>{menuitem.title}</span>
+              <span className="text-black block float-left text-4xl">{Icons[index]}</span>
+              <span className/*={`${!open && 'hidden '}`}*/>{menuitem.title}</span>
             </li>
           ))}
           <li className=''></li>

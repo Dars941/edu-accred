@@ -22,6 +22,7 @@ import COmapping from './Components/StaffDashBoardItem/COmapping';
 import AcedemicCalender from './Components/StaffDashBoardItem/acedemicCalender';
 import StaffAdvisorDashBoard from './Pages/StaffAdvisorDashBoard';
 import SubjectCreation from './Components/StaffAdvisorDashBoardItem/SubjectCreation' 
+import Studentliststaffadv from './Components/StaffAdvisorDashBoardItem/Studentlist'
 const App = () => {
 
   const currentUser = true;
@@ -79,7 +80,7 @@ const App = () => {
         </Route> 
         <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>
         <Route index element={<Navigate to="student list " />} /> 
-        <Route path="student list" element={<Studentlist />} />
+        <Route path="student list" element={<Studentliststaffadv />} />
         <Route path="create subject" element={<SubjectCreation />} />
         </Route>
 

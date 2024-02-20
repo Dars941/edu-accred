@@ -181,7 +181,7 @@ const StudentList = () => {
   };
 
   return (
-    <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
+    <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold overflow-x-auto'>
       <h2>Student List</h2>
       <button
         onClick={() => handleEdit({}, true)}
@@ -210,7 +210,7 @@ const StudentList = () => {
       <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">
           <tr className="rounded-lg">
-            <th className="px-4 py-2 font-semibold">Name</th>
+            <th className="px-4 py-2 font-semibold ">Name</th>
             <th className="px-4 py-2 font-semibold">Registration Number</th>
             <th className="px-4 py-2 font-semibold">Admission Number</th>
             <th className="px-4 py-2 font-semibold">Gender</th>

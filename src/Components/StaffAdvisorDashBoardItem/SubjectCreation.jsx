@@ -221,15 +221,7 @@ const SubjectList = () => {
                 }
               />
 
-              {/* <input
-                type="text"
-                placeholder="Staff"
-                className="border rounded-lg px-3 py-2 mb-2 w-full"
-                value={selectedSubject.staff}
-                onChange={(e) =>
-                  setSelectedSubject({ ...selectedSubject, staff: e.target.value })
-                }
-              /> */} 
+              
               <select
                 value={selectedSubject.staff}
                 onChange={(e) =>

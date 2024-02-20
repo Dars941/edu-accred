@@ -13,7 +13,7 @@ import StaffDashBoard from './Pages/StaffDashBoard';
 import StaffAdvisor from './Components/StaffDashBoardItem/StaffAdvisor';
 import NbaReport from './Components/StaffDashBoardItem/nbareport'; 
 import Syllabus from './Components/StaffDashBoardItem/syllabus';
-import Scheme from './Components/StaffDashBoardItem/Branch/Scheme';
+import Syllabuss from './Components/StaffDashBoardItem/Branch/Syllabus';
 import Studentlist from './Components/AdminDashBoardItem/Studentlist';
 import Batchlist from './Components/AdminDashBoardItem/Batchlist'
 import Departmentlist from './Components/AdminDashBoardItem/Departmentlist';
@@ -23,6 +23,13 @@ import AcedemicCalender from './Components/StaffDashBoardItem/acedemicCalender';
 import StaffAdvisorDashBoard from './Pages/StaffAdvisorDashBoard';
 import SubjectCreation from './Components/StaffAdvisorDashBoardItem/SubjectCreation' 
 import Studentliststaffadv from './Components/StaffAdvisorDashBoardItem/Studentlist'
+import Studentliststaff from './Components/StaffDashBoardItem/studentlist'
+import Upyq from './Components/StaffDashBoardItem/Upyq';
+import AssignOne from './Components/StaffDashBoardItem/AssignOne';
+import SeriesOne from './Components/StaffDashBoardItem/SeriesOne';
+import AssignTwo from './Components/StaffDashBoardItem/AssignTwo';
+import SeriesTwo from './Components/StaffDashBoardItem/SeriesTwo';
+import TAE from './Components/StaffDashBoardItem/TAE';
 const App = () => {
 
   const currentUser = true;
@@ -51,7 +58,9 @@ const App = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Staff />} />
+          <Route index element={<StaffAdvisor />} />
+          <Route path="Mission Vision" element={<StaffAdvisor />} /> 
+
           <Route path="staff" element={<Staff />} />
           <Route path="department" element={<Department />} />
           <Route path="student" element={<Student />} />
@@ -73,10 +82,16 @@ const App = () => {
           <Route path="syllabus" element={<Syllabus />} />
 
           <Route path="nbareport" element={<NbaReport />} />
-          <Route path="Branch/Scheme" element={<Scheme />} /> 
-          <Route path="studentlist" element={<Studentlist />} />
+          <Route path="Branch/Syllabus" element={<Syllabuss />} /> 
+          <Route path="studentlist" element={<Studentliststaff />} />
           <Route path="CO mapping" element={<COmapping />} />
           <Route path="acedemic calender" element={<AcedemicCalender />} />
+          <Route path="Prevous Univercity Qp" element={<Upyq />} />
+          <Route path="Assignment 1 Qp" element={<AssignOne />} />
+          <Route path="Series 1 Qp" element={<SeriesOne />} /> 
+          <Route path="Assignment 2 Qp" element={<AssignTwo />} />
+          <Route path="Series 2 Qp" element={<SeriesTwo />} />
+          <Route path="TAE parameter" element={<TAE />} />
         </Route> 
         <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>
         <Route index element={<Navigate to="student list " />} /> 

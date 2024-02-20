@@ -6,29 +6,79 @@ import { pdfjs } from 'react-pdf';
 import './pdf.worker'
 import PDFViewer from "../FileUpload/PdfViewer";
 
-function Acdcalender() {
+function TAE() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [pdfFiles, setPdfFiles] = useState([]);
   const [selectedPdfURL, setSelectedPdfURL] = useState(null);
   const [showPdfPopup, setShowPdfPopup] = useState(false); 
+  const [staffOptions, setStaffOptions] = useState([]);
+  const [subjectOptions, setSubjectOptions] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState(null);
   
   const popUpRef = useRef(null); // Reference to the PDF pop-up window
 
   useEffect(() => {
-    fetchPDFFiles();
-    // Add event listener when the component mounts
+    fetchStaffAndSubjects();
+    // Adding event listener to handle clicks outside the PDF popup
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      // Remove event listener when the component unmounts
+      // Cleanup the event listener on component unmount
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []); 
   
+  useEffect(() => {
+    if (selectedStaff) {
+      fetchSubjectsByStaff(selectedStaff);
+    }
+  }, [selectedStaff]);
+
+  useEffect(() => {
+    fetchPDFFiles();
+  }, [selectedStaff, selectedSubject]);
+
+  const fetchStaffAndSubjects = async () => {
+    try {
+      const { data: staffData, error: staffError } = await supabase
+        .from("stafflist")
+        .select("name");
+      if (staffError) {
+        console.error("Error fetching staff:", staffError.message);
+      } else {
+        setStaffOptions(staffData);
+      }
+    } catch (error) {
+      console.error("Error fetching staff:", error.message);
+    }
+  };
+
+  const fetchSubjectsByStaff = async (staffName) => {
+    try {
+      const { data: subjectData, error: subjectError } = await supabase
+        .from("Subject")
+        .select("name")
+        .eq("staff", staffName);
+      if (subjectError) {
+        console.error("Error fetching subjects by staff:", subjectError.message);
+      } else {
+        setSubjectOptions(subjectData);
+      }
+    } catch (error) {
+      console.error("Error fetching subjects by staff:", error.message);
+    }
+  };
+
   const fetchPDFFiles = async () => {
     try {
+      if (!selectedStaff || !selectedSubject) {
+        // If either staff or subject is not selected, do not fetch PDF files
+        return;
+      }
+
       const { data, error } = await supabase.storage
-        .from("storage")
-        .list("pdfs/");
+        .from("TAE")
+        .list(`pdfs/${selectedStaff}/${selectedSubject}`);
       if (error) {
         console.error("Error fetching PDF files:", error.message);
       } else {
@@ -49,27 +99,35 @@ function Acdcalender() {
       await uploadPDF(file);
     }
     setSelectedFiles([]);
-    fetchPDFFiles();
   };
 
   const uploadPDF = async (file) => {
     try {
       const { data, error } = await supabase.storage
-        .from("storage")
-        .upload(`pdfs/${file.name}`, file);
+        .from("TAE")
+        .upload(`pdfs/${selectedStaff}/${selectedSubject}/${file.name}`, file);
       if (error) {
         console.error("Error uploading file:", error.message);
       } else {
         console.log("File uploaded successfully:", data.Key);
+        // Fetch PDF files again after uploading
+        fetchPDFFiles(); 
+        // Update pdfFiles state with the newly uploaded file
+        setPdfFiles([...pdfFiles, { name: file.name }]);
       }
     } catch (error) {
       console.error("Error uploading file:", error.message);
     }
   };
   
+  const handleSubjectClick = (subjectName) => {
+    setSelectedSubject(subjectName);
+    fetchPDFFiles();
+  };
+
   const handlePdfClick = (pdfFileName) => {
-    const supabaseBaseUrl = 'https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/storage/pdfs/';
-    const pdfURL = `${supabaseBaseUrl}${pdfFileName}`;
+    const supabaseBaseUrl = 'https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/TAE/pdfs/';
+    const pdfURL = `${supabaseBaseUrl}${selectedStaff}/${selectedSubject}/${pdfFileName}`;
     
     // Open the PDF pop-up window
     setSelectedPdfURL(pdfURL);
@@ -91,7 +149,41 @@ function Acdcalender() {
 
   return (
     <div className="w-full p-[2.5rem] bg-gray-100 rounded-lg shadow-lg  overflow-y-scroll"> 
-     <div className="text-2xl pb-4 font-medium">Acedemic Calender</div>
+      <div className="text-2xl pb-4 font-medium">TAE parameter</div>
+      <div className="flex mb-4">
+        {/* Staff Selection Dropdown */}
+        <select 
+          className="mr-4"
+          onChange={(e) => setSelectedStaff(e.target.value)}
+        >
+          <option value="">Select Staff</option>
+          {staffOptions.map((staff, index) => (
+            <option key={index} value={staff.name}>{staff.name}</option>
+          ))}
+        </select>
+      </div>
+      {subjectOptions.length > 0 && (
+        <div className="flex flex-wrap rounded-[50%]">
+          {subjectOptions.map((subject, index) => (
+            <div key={index} className="bg-blue-200 p-2 m-2 rounded cursor-pointer" onClick={() => handleSubjectClick(subject.name)}>
+              <div className="md:w-[25rem] h-[5rem] bg-white rounded-md shadow-lg hover:bg-red-200">
+                <div className="flex justify-between px-4 py-2">
+                  <div className="flex flex-col my-3.5">
+                    <div className="text-[grey] text-xl"></div>
+                    <div className="text-blue-500 text-2xl">{subject.name}</div>
+                  </div>
+                  <div className="flex py-[10px]">
+                    <div className="w-[2.5rem] md:w-[2.5rem] h-[2.5rem] bg-light-blue rounded-[25%] text-center py-[5%]">
+                      -{`>`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <input
         type="file"
         accept=".pdf"
@@ -123,7 +215,7 @@ function Acdcalender() {
                   {file.name}
                 </a> 
                 <a
-                  href={`https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/storage/pdfs/${file.name}?t=${file.last_modified}`}
+                  href={`https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/TAE/pdfs/${selectedStaff}/${selectedSubject}/${file.name}?t=${file.last_modified}`}
                   download
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded-lg flex items-center"
                 >
@@ -155,4 +247,4 @@ function Acdcalender() {
   );
 }
 
-export default Acdcalender;
+export default TAE;

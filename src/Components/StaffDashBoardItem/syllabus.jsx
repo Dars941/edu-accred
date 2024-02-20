@@ -21,7 +21,7 @@ const Syllabus = () => {
               </div>  
               <div className='rounded-lg py-2 px-4 flex bg-red-200 justify-center align-item-center hover:bg-green-300'>
                 <i class="fa-regular fa-eye py-2 px-1"></i>
-                <Link to={`/staffdashboard/Branch/Scheme`}>
+                <Link to={`/staffdashboard/Branch/Syllabus`}>
                   <button className='py-1'>Branch</button>
                 </Link>
               </div>

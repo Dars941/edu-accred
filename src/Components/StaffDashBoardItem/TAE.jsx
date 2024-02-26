@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import supabase from '../../createClent';
+
 import { Document, Page } from 'react-pdf';  
+import { useLocation } from 'react-router-dom';
 import { pdfjs } from 'react-pdf'; 
 import './pdf.worker'
 import PDFViewer from "../FileUpload/PdfViewer";
@@ -11,15 +13,12 @@ function TAE() {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [selectedPdfURL, setSelectedPdfURL] = useState(null);
   const [showPdfPopup, setShowPdfPopup] = useState(false); 
-  const [staffOptions, setStaffOptions] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
-  const [selectedStaff, setSelectedStaff] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   
-  const popUpRef = useRef(null); // Reference to the PDF pop-up window
-
+  const email = localStorage.getItem("email");
   useEffect(() => {
-    fetchStaffAndSubjects();
+    // fetchStaffAndSubjects();
     // Adding event listener to handle clicks outside the PDF popup
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -27,67 +26,53 @@ function TAE() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []); 
-  
-  useEffect(() => {
-    if (selectedStaff) {
-      fetchSubjectsByStaff(selectedStaff);
-    }
-  }, [selectedStaff]);
 
-  useEffect(() => {
-    fetchPDFFiles();
-  }, [selectedStaff, selectedSubject]);
+    const [name, setName] = useState("");
+    const fetchName = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("stafflist")
+          .select("name")
+          .eq("email", email)
+          .single();
 
-  const fetchStaffAndSubjects = async () => {
-    try {
-      const { data: staffData, error: staffError } = await supabase
-        .from("stafflist")
-        .select("name");
-      if (staffError) {
-        console.error("Error fetching staff:", staffError.message);
-      } else {
-        setStaffOptions(staffData);
+        if (error) {
+          throw error;
+        }
+
+        setName(data.name);
+      } catch (error) {
+        console.error("Fetch name error:", error.message);
       }
-    } catch (error) {
-      console.error("Error fetching staff:", error.message);
-    }
-  };
+    };
+    
 
-  const fetchSubjectsByStaff = async (staffName) => {
-    try {
-      const { data: subjectData, error: subjectError } = await supabase
-        .from("Subject")
-        .select("name")
-        .eq("staff", staffName);
-      if (subjectError) {
-        console.error("Error fetching subjects by staff:", subjectError.message);
-      } else {
-        setSubjectOptions(subjectData);
-      }
-    } catch (error) {
-      console.error("Error fetching subjects by staff:", error.message);
-    }
-  };
+    useEffect(() => {
+      fetchName();
+    }, []); 
 
-  const fetchPDFFiles = async () => {
-    try {
-      if (!selectedStaff || !selectedSubject) {
-        // If either staff or subject is not selected, do not fetch PDF files
-        return;
+    useEffect(() => {
+      console.log("Email received:", email);
+      if (name) {
+        fetchSubjectsByStaff(name);
       }
+    }, [email, name]);
 
-      const { data, error } = await supabase.storage
-        .from("TAE")
-        .list(`pdfs/${selectedStaff}/${selectedSubject}`);
-      if (error) {
-        console.error("Error fetching PDF files:", error.message);
-      } else {
-        setPdfFiles(data);
+    const fetchSubjectsByStaff = async (staffName) => {
+      try {
+        const { data: subjectData, error: subjectError } = await supabase
+          .from("Subject")
+          .select("name")
+          .eq("staff", staffName);
+        if (subjectError) {
+          console.error("Error fetching subjects by staff:", subjectError.message);
+        } else {
+          setSubjectOptions(subjectData);
+        }
+      } catch (error) {
+        console.error("Error fetching subjects by staff:", error.message);
       }
-    } catch (error) {
-      console.error("Error fetching PDF files:", error.message);
-    }
-  };
+    };
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -105,7 +90,7 @@ function TAE() {
     try {
       const { data, error } = await supabase.storage
         .from("TAE")
-        .upload(`pdfs/${selectedStaff}/${selectedSubject}/${file.name}`, file);
+        .upload(`pdfs/${name}/${selectedSubject}/${file.name}`, file);
       if (error) {
         console.error("Error uploading file:", error.message);
       } else {
@@ -125,9 +110,29 @@ function TAE() {
     fetchPDFFiles();
   };
 
+  const fetchPDFFiles = async () => {
+    try {
+      if (!name || !selectedSubject) {
+        // If either staff or subject is not selected, do not fetch PDF files
+        return;
+      }
+
+      const { data, error } = await supabase.storage
+        .from("TAE")
+        .list(`pdfs/${name}/${selectedSubject}`);
+      if (error) {
+        console.error("Error fetching PDF files:", error.message);
+      } else {
+        setPdfFiles(data);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF files:", error.message);
+    }
+  };
+
   const handlePdfClick = (pdfFileName) => {
     const supabaseBaseUrl = 'https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/TAE/pdfs/';
-    const pdfURL = `${supabaseBaseUrl}${selectedStaff}/${selectedSubject}/${pdfFileName}`;
+    const pdfURL = `${supabaseBaseUrl}${name}/${selectedSubject}/${pdfFileName}`;
     
     // Open the PDF pop-up window
     setSelectedPdfURL(pdfURL);
@@ -147,21 +152,17 @@ function TAE() {
     }
   };
 
+  const popUpRef = useRef(null); // Reference to the PDF pop-up window
+
   return (
     <div className="w-full p-[2.5rem] bg-gray-100 rounded-lg shadow-lg  overflow-y-scroll"> 
-      <div className="text-2xl pb-4 font-medium">TAE parameter</div>
-      <div className="flex mb-4">
-        {/* Staff Selection Dropdown */}
-        <select 
-          className="mr-4"
-          onChange={(e) => setSelectedStaff(e.target.value)}
-        >
-          <option value="">Select Staff</option>
-          {staffOptions.map((staff, index) => (
-            <option key={index} value={staff.name}>{staff.name}</option>
-          ))}
-        </select>
-      </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold">Staff Dashboard</h1>
+      <p>Email: {email}</p>
+      <p>Name: {name}</p>
+      {/* Rest of the admin dashboard */}
+    </div>
+      <div className="text-2xl pb-4 font-medium">Previous University Question Paper</div>
       {subjectOptions.length > 0 && (
         <div className="flex flex-wrap rounded-[50%]">
           {subjectOptions.map((subject, index) => (
@@ -215,7 +216,7 @@ function TAE() {
                   {file.name}
                 </a> 
                 <a
-                  href={`https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/TAE/pdfs/${selectedStaff}/${selectedSubject}/${file.name}?t=${file.last_modified}`}
+                  href={`https://jubfonzpooabcktpgfip.supabase.co/storage/v1/object/public/TAE/pdfs/${name}/${selectedSubject}/${file.name}?t=${file.last_modified}`}
                   download
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded-lg flex items-center"
                 >

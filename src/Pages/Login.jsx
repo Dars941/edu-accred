@@ -16,7 +16,8 @@ function Login() {
 
       if (error) {
         throw error;
-      }
+      } 
+      localStorage.setItem("email", username);
 
       // Fetch user role from the database
       const { data, error: roleError } = await supabase
@@ -34,16 +35,16 @@ function Login() {
       // Redirect based on user role
       switch (userRole) {
         case "admin":
-          navigate("/admindashboard");
+          navigate("/admindashboard",);
           break;
         case "student":
-          navigate("/studentdashboard");
+          navigate("/studentdashboard",);
           break;
         case "staff":
-          navigate("/staffdashboard");
+          navigate("/staffdashboard",);
           break;
         case "staffadvisor":
-          navigate("/staffadvisordashboard");
+          navigate("/staffadvisordashboard",);
           break;
         default:
           console.log("Unknown role");

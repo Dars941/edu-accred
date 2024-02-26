@@ -13,7 +13,7 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-    { title: 'Mission Vision' },
+    // { title: 'Mission Vision' },
     { title: 'student list' },
     { title: 'batch list' },
     { title: 'department list' }, 

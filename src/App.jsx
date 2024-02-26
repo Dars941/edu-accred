@@ -30,13 +30,15 @@ import SeriesOne from './Components/StaffDashBoardItem/SeriesOne';
 import AssignTwo from './Components/StaffDashBoardItem/AssignTwo';
 import SeriesTwo from './Components/StaffDashBoardItem/SeriesTwo';
 import TAE from './Components/StaffDashBoardItem/TAE';
+import WelcomeStaff from './Components/StaffDashBoardItem/WelcomeStaff';
+import CoursePlanTable from './Components/StaffDashBoardItem/CoursePlan';
+import AttendenceRegister from './Components/StaffDashBoardItem/AttendenceRegister';
 const App = () => {
-
-  const currentUser = true;
-
+  
   const ProtectedRoute = ({ children }) => {
     return currentUser ? children : <Navigate to="/" />;
   };
+  const currentUser = true;
 
   return (
     <Router>
@@ -58,8 +60,8 @@ const App = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<StaffAdvisor />} />
-          <Route path="Mission Vision" element={<StaffAdvisor />} /> 
+          <Route index element={<studentlist />} />
+          {/* <Route path="Mission Vision" element={<StaffAdvisor />} />  */}
 
           <Route path="staff" element={<Staff />} />
           <Route path="department" element={<Department />} />
@@ -92,6 +94,8 @@ const App = () => {
           <Route path="Assignment 2 Qp" element={<AssignTwo />} />
           <Route path="Series 2 Qp" element={<SeriesTwo />} />
           <Route path="TAE parameter" element={<TAE />} />
+          <Route path="course plan" element={<CoursePlanTable />} />
+          <Route path="Attendence Register" element={<AttendenceRegister />} />
         </Route> 
         <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>
         <Route index element={<Navigate to="student list " />} /> 

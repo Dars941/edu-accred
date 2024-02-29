@@ -161,7 +161,7 @@ function SeriesOne() {
       <h1 className="text-2xl font-bold">Staff Dashboard</h1>
       <p>Email: {email}</p>
       <p>Name: {name}</p>
-      {/* Rest of the admin dashboard */}
+     
     </div>
       <div className="text-2xl pb-4 font-medium">Series One Question Paper</div>
       {subjectOptions.length > 0 && (

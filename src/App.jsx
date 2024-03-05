@@ -33,6 +33,7 @@ import TAE from './Components/StaffDashBoardItem/TAE';
 import WelcomeStaff from './Components/StaffDashBoardItem/WelcomeStaff';
 import CoursePlanTable from './Components/StaffDashBoardItem/CoursePlan';
 import AttendenceRegister from './Components/StaffDashBoardItem/AttendenceRegister';
+import CourseOutcomeTable from './Components/StaffDashBoardItem/CourseOutcome';
 const App = () => {
   
   const ProtectedRoute = ({ children }) => {
@@ -87,6 +88,7 @@ const App = () => {
           <Route path="Branch/Syllabus" element={<Syllabuss />} /> 
           <Route path="studentlist" element={<Studentliststaff />} />
           <Route path="CO mapping" element={<COmapping />} />
+          <Route path="Course Outcome S1" element={<CourseOutcomeTable />} />
           <Route path="acedemic calender" element={<AcedemicCalender />} />
           <Route path="Prevous Univercity Qp" element={<Upyq />} />
           <Route path="Assignment 1 Qp" element={<AssignOne />} />

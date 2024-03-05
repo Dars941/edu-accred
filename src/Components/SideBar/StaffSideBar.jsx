@@ -18,6 +18,7 @@ const SideBar = ({ email }) => { // Accepting email prop
     { title: 'CO mapping', icon: <FcDepartment key='co,po,bl' /> }, 
     { title: 'Acedemic calender', icon: <FcDepartment key='acedemic calender' /> }, 
     { title: 'course plan', icon: <FcDepartment key='course plan' /> }, 
+    { title: 'Course Outcome S1', icon: <FcDepartment key='course outcome' /> }, 
     { title: 'TAE parameter', icon: <FcDepartment key='TAE parameter' /> }, 
     { title: 'Course Coverage', icon: <FcDepartment key='Course Coverge' /> }, 
     { title: 'Attendence Register', icon: <FcDepartment key='Attendence Register' /> }, 

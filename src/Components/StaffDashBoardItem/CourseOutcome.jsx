@@ -22,7 +22,49 @@ function CourseOutcomeTable() {
   });
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [editCourseOutcomeId, setEditCourseOutcomeId] = useState(null);
-
+  const generatePDF = () => {
+    // Create a new jsPDF instance
+    const doc = new jsPDF();
+  
+    // Define the header for the PDF
+    const header = 'Course Outcomes for ' + selectedSubject.name;
+    
+    // Define the data for the table
+    const data = [];
+    courseOutcomes.forEach((outcome, index) => {
+      const rowData = [
+        index + 1,
+        outcome.name,
+        outcome.CO1_PART_A_Q1,
+        outcome.CO1_PART_A_Q2,
+        outcome.CO1_PART_B_Q1,
+        outcome.CO1_PART_B_Q2,
+        outcome.CO2_PART_A_Q1,
+        outcome.CO2_PART_A_Q2,
+        outcome.CO2_PART_B_Q1,
+        outcome.CO2_PART_B_Q2,
+        outcome.CO1_total,
+        outcome.CO1_percentage,
+        outcome.CO2_total,
+        outcome.CO2_percentage
+      ];
+      data.push(rowData);
+    });
+  
+    // Set the header and table data
+    doc.text(header, 10, 10);
+    doc.autoTable({
+      startY: 20,
+      head: [
+        ['No', 'Name', 'CO1_PART_A_Q1', 'CO1_PART_A_Q2', 'CO1_PART_B_Q1', 'CO1_PART_B_Q2', 'CO2_PART_A_Q1', 'CO2_PART_A_Q2', 'CO2_PART_B_Q1', 'CO2_PART_B_Q2', 'CO1_total', 'CO1_percentage', 'CO2_total', 'CO2_percentage']
+      ],
+      body: data
+    });
+  
+    // Save the PDF
+    doc.save('course_outcomes.pdf');
+  };
+  
   useEffect(() => {
     const email = localStorage.getItem("email");
     setEmail(email);
@@ -115,6 +157,30 @@ function CourseOutcomeTable() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewCourseOutcome({ ...newCourseOutcome, [name]: value });
+
+    // Recalculate CO totals and percentages
+    const co1Total =
+      parseInt(newCourseOutcome.CO1_PART_A_Q1) +
+      parseInt(newCourseOutcome.CO1_PART_A_Q2) +
+      parseInt(newCourseOutcome.CO1_PART_B_Q1) +
+      parseInt(newCourseOutcome.CO1_PART_B_Q2);
+    const co2Total =
+      parseInt(newCourseOutcome.CO2_PART_A_Q1) +
+      parseInt(newCourseOutcome.CO2_PART_A_Q2) +
+      parseInt(newCourseOutcome.CO2_PART_B_Q1) +
+      parseInt(newCourseOutcome.CO2_PART_B_Q2);
+
+    const co1Percentage = Math.round((co1Total / (3 * 4)) * 100);
+    const co2Percentage = Math.round((co2Total / (14 * 4)) * 100);
+
+    // Update the CO totals and percentages in the state
+    setNewCourseOutcome((prevOutcome) => ({
+      ...prevOutcome,
+      CO1_total: co1Total,
+      CO1_percentage: co1Percentage,
+      CO2_total: co2Total,
+      CO2_percentage: co2Percentage,
+    }));
   };
 
   const addCourseOutcome = async (event) => {
@@ -171,6 +237,52 @@ function CourseOutcomeTable() {
     } catch (error) {
       console.error("Error deleting course outcome:", error.message);
     }
+  }; 
+  const editCourseOutcome = async (event) => {
+    event.preventDefault();
+    try {
+      const { data: updatedCourseOutcomeData, error: editError } = await supabase
+        .from("course_outcomes_1")
+        .update({
+          name: newCourseOutcome.name,
+          CO1_PART_A_Q1: newCourseOutcome.CO1_PART_A_Q1,
+          CO1_PART_A_Q2: newCourseOutcome.CO1_PART_A_Q2,
+          CO1_PART_B_Q1: newCourseOutcome.CO1_PART_B_Q1,
+          CO1_PART_B_Q2: newCourseOutcome.CO1_PART_B_Q2,
+          CO2_PART_A_Q1: newCourseOutcome.CO2_PART_A_Q1,
+          CO2_PART_A_Q2: newCourseOutcome.CO2_PART_A_Q2,
+          CO2_PART_B_Q1: newCourseOutcome.CO2_PART_B_Q1,
+          CO2_PART_B_Q2: newCourseOutcome.CO2_PART_B_Q2,
+        })
+        .eq("id", editCourseOutcomeId);
+  
+      if (editError) {
+        console.error("Error editing course outcome:", editError.message);
+      } else {
+        console.log("Successfully edited course outcome:", updatedCourseOutcomeData);
+        const updatedCourseOutcomes = courseOutcomes.map(outcome =>
+          outcome.id === editCourseOutcomeId ? updatedCourseOutcomeData[0] : outcome
+        );
+        setCourseOutcomes(updatedCourseOutcomes);
+        setNewCourseOutcome({
+          name: "",
+          CO1_PART_A_Q1: 0,
+          CO1_PART_A_Q2: 0,
+          CO1_PART_B_Q1: 0,
+          CO1_PART_B_Q2: 0,
+          CO2_PART_A_Q1: 0,
+          CO2_PART_A_Q2: 0,
+          CO2_PART_B_Q1: 0,
+          CO2_PART_B_Q2: 0,
+        });
+        // setShowAddEditModal(false);
+      }
+    } catch (error) {
+      console.error("Error editing course outcome:", error.message);
+    } finally {
+      setShowAddEditModal(false);
+    } 
+    
   };
 
   return (
@@ -229,24 +341,31 @@ function CourseOutcomeTable() {
           >
             Add
           </button>
+          <button
+            onClick={generatePDF}
+            className="bg-blue-500 w-[160px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
+          >
+            Generate PDF
+          </button>
           <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
             <thead className="rounded-lg">
               <tr className="rounded-lg">
-                <th className="px-8 py-4 font-semibold">No</th>
-                <th className="px-8 py-4 font-semibold">Student Name</th>
-                <th className="px-8 py-4 font-semibold">CO1_PART_A_Q1</th>
-                <th className="px-8 py-4 font-semibold">CO1_PART_A_Q2</th>
-                <th className="px-8 py-4 font-semibold">CO1_PART_B_Q1</th>
-                <th className="px-8 py-4 font-semibold">CO1_PART_B_Q2</th>
-                <th className="px-8 py-4 font-semibold">CO2_PART_A_Q1</th>
-                <th className="px-8 py-4 font-semibold">CO2_PART_A_Q2</th>
-                <th className="px-8 py-4 font-semibold">CO2_PART_B_Q1</th>
-                <th className="px-8 py-4 font-semibold">CO2_PART_B_Q2</th>
-                <th className="px-8 py-4 font-semibold">CO1_total</th>
-                <th className="px-8 py-4 font-semibold">CO1_percentage</th>
-                <th className="px-8 py-4 font-semibold">CO2_total</th>
-                <th className="px-8 py-4 font-semibold">CO2_percentage</th>
-                <th className="px-8 py-4 font-semibold">Actions</th>
+              <th className="px-4 py-2 font-semibold">No</th>
+<th className="px-4 py-2 font-semibold">Student Name</th>
+<th className="px-4 py-2 font-semibold">CO1_PART_A_Q1</th>
+<th className="px-4 py-2 font-semibold">CO1_PART_A_Q2</th>
+<th className="px-4 py-2 font-semibold">CO1_PART_B_Q1</th>
+<th className="px-4 py-2 font-semibold">CO1_PART_B_Q2</th>
+<th className="px-4 py-2 font-semibold">CO2_PART_A_Q1</th>
+<th className="px-4 py-2 font-semibold">CO2_PART_A_Q2</th>
+<th className="px-4 py-2 font-semibold">CO2_PART_B_Q1</th>
+<th className="px-4 py-2 font-semibold">CO2_PART_B_Q2</th>
+<th className="px-4 py-2 font-semibold">CO1_total</th>
+<th className="px-4 py-2 font-semibold">CO1_percentage</th>
+<th className="px-4 py-2 font-semibold">CO2_total</th>
+<th className="px-4 py-2 font-semibold">CO2_percentage</th>
+<th className="px-4 py-2 font-semibold">Actions</th>
+
               </tr>
             </thead>
             <tbody className="font-sans">
@@ -255,70 +374,62 @@ function CourseOutcomeTable() {
                   key={outcome.id}
                   className={index % 2 === 0 ? "bg-text-hover-bg" : ""}
                 >
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {index + 1}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.name}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO1_PART_A_Q1}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO1_PART_A_Q2}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO1_PART_B_Q1}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO1_PART_B_Q2}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO2_PART_A_Q1}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO2_PART_A_Q2}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO2_PART_B_Q1}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
+                  <td className="px-4 py-2 font-light text-[20px]">
                     {outcome.CO2_PART_B_Q2}
                   </td>
-                  {/* Calculate CO1 and CO2 totals and percentages for each student */}
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {parseInt(outcome.CO1_PART_A_Q1) +
-                      parseInt(outcome.CO1_PART_A_Q2) +
-                      parseInt(outcome.CO1_PART_B_Q1) +
-                      parseInt(outcome.CO1_PART_B_Q2)}
+                  <td className="px-4 py-2 font-light text-[20px]">
+                    {outcome.CO1_total}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {Math.round(
-                      ((parseInt(outcome.CO1_PART_A_Q1) +
-                        parseInt(outcome.CO1_PART_A_Q2) +
-                        parseInt(outcome.CO1_PART_B_Q1) +
-                        parseInt(outcome.CO1_PART_B_Q2)) /
-                        (3 * 4)) *
-                        100
-                    )}%
+                  <td className="px-4 py-2 font-light text-[20px]">
+                    {outcome.CO1_percentage}%
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {parseInt(outcome.CO2_PART_A_Q1) +
-                      parseInt(outcome.CO2_PART_A_Q2) +
-                      parseInt(outcome.CO2_PART_B_Q1) +
-                      parseInt(outcome.CO2_PART_B_Q2)}
+                  <td className="px-4 py-2 font-light text-[20px]">
+                    {outcome.CO2_total}
                   </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {Math.round(
-                      ((parseInt(outcome.CO2_PART_A_Q1) +
-                        parseInt(outcome.CO2_PART_A_Q2) +
-                        parseInt(outcome.CO2_PART_B_Q1) +
-                        parseInt(outcome.CO2_PART_B_Q2)) /
-                        (14 * 4)) *
-                        100
-                    )}%
+                  <td className="px-4 py-2 font-light text-[20px]">
+                    {outcome.CO2_percentage}%
                   </td>
-                  {/* Display actions */}
+                  <td className="px-4 py-2 font-light text-[20px]">
+                    <button
+                      onClick={() => handleEdit(outcome.id)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(outcome.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -326,9 +437,9 @@ function CourseOutcomeTable() {
         </div>
       )}
 
-        {/* Add/Edit Course Outcome Modal */}
-        {showAddEditModal && (
-        <div className="fixed top-0 left-0 w-full h-full flex  items-center justify-center bg-gray-900 bg-opacity-50">
+      {/* Add/Edit Course Outcome Modal */}
+      {showAddEditModal && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg ">
             <h2 className="text-lg font-semibold mb-4">
               {editCourseOutcomeId
@@ -338,8 +449,9 @@ function CourseOutcomeTable() {
             {/* Form for adding/editing course outcome */}
             <form
               onSubmit={
-                editCourseOutcomeId ? editCourseOutcomeId : addCourseOutcome
+                editCourseOutcomeId !== null ? editCourseOutcome : addCourseOutcome
               }
+              
               className=""
             >
               <div className="flex">
@@ -468,7 +580,7 @@ function CourseOutcomeTable() {
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                 >
-                  {editCourseOutcomeId ? "Edit" : "Add"} Course Outcome
+                  {editCourseOutcomeId ? "Save Changes" : "Add"}
                 </button>
               </div>
             </form>

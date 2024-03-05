@@ -22,10 +22,6 @@ function CourseOutcomeTable() {
   });
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [editCourseOutcomeId, setEditCourseOutcomeId] = useState(null);
-  const [CO1_total, setCO1_total] = useState(0);
-  const [CO1_percentage, setCO1_percentage] = useState(0);
-  const [CO2_total, setCO2_total] = useState(0);
-  const [CO2_percentage, setCO2_percentage] = useState(0);
 
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -124,33 +120,15 @@ function CourseOutcomeTable() {
   const addCourseOutcome = async (event) => {
     event.preventDefault();
     try {
-      // Calculate CO totals and percentages
-      const CO1_total =
-        parseInt(newCourseOutcome.CO1_PART_A_Q1) +
-        parseInt(newCourseOutcome.CO1_PART_A_Q2) +
-        parseInt(newCourseOutcome.CO1_PART_B_Q1) +
-        parseInt(newCourseOutcome.CO1_PART_B_Q2);
-      const CO1_percentage = Math.round((CO1_total / (3 * 4)) * 100); // Round to nearest integer
-      const CO2_total =
-        parseInt(newCourseOutcome.CO2_PART_A_Q1) +
-        parseInt(newCourseOutcome.CO2_PART_A_Q2) +
-        parseInt(newCourseOutcome.CO2_PART_B_Q1) +
-        parseInt(newCourseOutcome.CO2_PART_B_Q2);
-      const CO2_percentage = Math.round((CO2_total / (14 * 4)) * 100); // Round to nearest integer
-  
       const { data: newCourseOutcomeData, error: addError } = await supabase
         .from("course_outcomes_1")
         .insert([
           {
             subject_id: selectedSubject.id,
             ...newCourseOutcome,
-            CO1_total,
-            CO1_percentage,
-            CO2_total,
-            CO2_percentage,
           },
         ]);
-  
+
       if (addError) {
         console.error("Error adding course outcome:", addError.message);
       } else {
@@ -174,8 +152,6 @@ function CourseOutcomeTable() {
       setShowAddEditModal(false);
     }
   };
-  
-  
 
   const handleEdit = (outcomeId) => {
     const selectedOutcome = courseOutcomes.find(
@@ -196,34 +172,6 @@ function CourseOutcomeTable() {
       console.error("Error deleting course outcome:", error.message);
     }
   };
-
-  // Calculate CO1 total and percentage
-  useEffect(() => {
-    const { CO1_PART_A_Q1, CO1_PART_A_Q2, CO1_PART_B_Q1, CO1_PART_B_Q2 } =
-      newCourseOutcome;
-    const totalCO1 =
-      parseInt(CO1_PART_A_Q1) +
-      parseInt(CO1_PART_A_Q2) +
-      parseInt(CO1_PART_B_Q1) +
-      parseInt(CO1_PART_B_Q2);
-    setCO1_total(totalCO1);
-    const percentageCO1 = (totalCO1 / 200) * 100; // Assuming total for CO1 is 200
-    setCO1_percentage(percentageCO1);
-  }, [newCourseOutcome]);
-
-  // Calculate CO2 total and percentage
-  useEffect(() => {
-    const { CO2_PART_A_Q1, CO2_PART_A_Q2, CO2_PART_B_Q1, CO2_PART_B_Q2 } =
-      newCourseOutcome;
-    const totalCO2 =
-      parseInt(CO2_PART_A_Q1) +
-      parseInt(CO2_PART_A_Q2) +
-      parseInt(CO2_PART_B_Q1) +
-      parseInt(CO2_PART_B_Q2);
-    setCO2_total(totalCO2);
-    const percentageCO2 = (totalCO2 / 200) * 100; // Assuming total for CO2 is 200
-    setCO2_percentage(percentageCO2);
-  }, [newCourseOutcome]);
 
   return (
     <div className="bg-blue-100 h-screen w-screen overflow-auto mr-2">
@@ -337,29 +285,40 @@ function CourseOutcomeTable() {
                   <td className="px-8 py-4 font-light text-[20px]">
                     {outcome.CO2_PART_B_Q2}
                   </td>
+                  {/* Calculate CO1 and CO2 totals and percentages for each student */}
                   <td className="px-8 py-4 font-light text-[20px]">
-                    {CO1_total}
-                  </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {CO1_percentage}%
-                  </td>
-                  <td className="px-8 py-4 font-light text-[20px]">
-                    {CO2_total}
+                    {parseInt(outcome.CO1_PART_A_Q1) +
+                      parseInt(outcome.CO1_PART_A_Q2) +
+                      parseInt(outcome.CO1_PART_B_Q1) +
+                      parseInt(outcome.CO1_PART_B_Q2)}
                   </td>
                   <td className="px-8 py-4 font-light text-[20px]">
-                    {CO2_percentage}%
+                    {Math.round(
+                      ((parseInt(outcome.CO1_PART_A_Q1) +
+                        parseInt(outcome.CO1_PART_A_Q2) +
+                        parseInt(outcome.CO1_PART_B_Q1) +
+                        parseInt(outcome.CO1_PART_B_Q2)) /
+                        (3 * 4)) *
+                        100
+                    )}%
                   </td>
-                  <td className="px-8 py-4 flex gap-6">
-                    <button
-                      className="mr-2"
-                      onClick={() => handleEdit(outcome.id)}
-                    >
-                      <i className="fa-solid fa-pencil text-blue-500"></i>
-                    </button>
-                    <button onClick={() => handleDelete(outcome.id)}>
-                      <i className="fa-solid fa-trash text-red-500"></i>
-                    </button>
+                  <td className="px-8 py-4 font-light text-[20px]">
+                    {parseInt(outcome.CO2_PART_A_Q1) +
+                      parseInt(outcome.CO2_PART_A_Q2) +
+                      parseInt(outcome.CO2_PART_B_Q1) +
+                      parseInt(outcome.CO2_PART_B_Q2)}
                   </td>
+                  <td className="px-8 py-4 font-light text-[20px]">
+                    {Math.round(
+                      ((parseInt(outcome.CO2_PART_A_Q1) +
+                        parseInt(outcome.CO2_PART_A_Q2) +
+                        parseInt(outcome.CO2_PART_B_Q1) +
+                        parseInt(outcome.CO2_PART_B_Q2)) /
+                        (14 * 4)) *
+                        100
+                    )}%
+                  </td>
+                  {/* Display actions */}
                 </tr>
               ))}
             </tbody>
@@ -367,8 +326,8 @@ function CourseOutcomeTable() {
         </div>
       )}
 
-      {/* Add/Edit Course Outcome Modal */}
-      {showAddEditModal && (
+        {/* Add/Edit Course Outcome Modal */}
+        {showAddEditModal && (
         <div className="fixed top-0 left-0 w-full h-full flex  items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg ">
             <h2 className="text-lg font-semibold mb-4">

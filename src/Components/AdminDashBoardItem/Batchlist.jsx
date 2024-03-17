@@ -77,7 +77,7 @@ const Batchlist = () => {
     }
   };
   return (
-    <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold'>
+    <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold overflow-x-auto'>
       <h2>Batch List</h2>
       <button
         onClick={() => {
@@ -89,7 +89,7 @@ const Batchlist = () => {
         Add
       </button>
       {fetchError && <p>{fetchError}</p>}
-      <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
+      <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg overflow-auto">
         <thead className="rounded-lg">
           <tr className="rounded-lg">
             <th className="px-8 py-4 font-semibold">Batch ID</th>

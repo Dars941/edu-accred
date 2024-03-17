@@ -13,11 +13,12 @@ const SideBar = () => {
   const navigate = useNavigate();
 
   const Menus = [
-    // { title: 'Mission Vision' },
+     { title: 'users' },
     { title: 'student list' },
     { title: 'batch list' },
     { title: 'department list' }, 
     { title: 'staff list' }, 
+   
     { title: 'logout' },
   ];
 
@@ -26,7 +27,8 @@ const SideBar = () => {
     <TiGroupOutline key='Staff'/>,
     <FcDepartment key='Department'/>,
     <FcDepartment key='Department'/>,
-    <RiDashboardFill key="dashboard" />, 
+    <RiDashboardFill key="dashboard" />,  
+    
     <IoIosLogOut key="logout" />,
   ];
 

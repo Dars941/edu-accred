@@ -34,7 +34,8 @@ import WelcomeStaff from './Components/StaffDashBoardItem/WelcomeStaff';
 import CoursePlanTable from './Components/StaffDashBoardItem/CoursePlan';
 import AttendenceRegister from './Components/StaffDashBoardItem/AttendenceRegister';
 import CourseOutcomeTable from './Components/StaffDashBoardItem/CourseOutcome';
-import CourseCoverage from './Components/StaffDashBoardItem/CourseCoverge';
+import CourseCoverage from './Components/StaffDashBoardItem/CourseCoverge'; 
+import Users from './Components/AdminDashBoardItem/users';
 const App = () => {
   
   const ProtectedRoute = ({ children }) => {
@@ -72,6 +73,7 @@ const App = () => {
           <Route path="batch list" element={<Batchlist />} />
           <Route path="department list" element={<Departmentlist />} />
           <Route path="staff list" element={<Stafflist />} />
+          <Route path="users" element={<Users />} />
         </Route>
 
         <Route path="studentdashboard" element={<StudentDashboard />}>

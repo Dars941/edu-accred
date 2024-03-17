@@ -9,52 +9,50 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const { user, error } = await supabase.auth.signInWithPassword({
-        email: username,
-        password: password,
-      });
-
-      if (error) {
-        throw error;
-      } 
-      localStorage.setItem("email", username);
-
-      // Fetch user role from the database
-      const { data, error: roleError } = await supabase
+      // Query the user based on the provided email and password
+      const { data: userData, error: loginError } = await supabase
         .from("users")
-        .select("role")
+        .select("email, role")
         .eq("email", username)
+        .eq("password", password)
         .single();
-
-      if (roleError) {
-        throw roleError;
+  
+      if (loginError) {
+        throw loginError;
       }
-
-      const userRole = data.role;
-
-      // Redirect based on user role
-      switch (userRole) {
-        case "admin":
-          navigate("/admindashboard",);
-          break;
-        case "student":
-          navigate("/studentdashboard",);
-          break;
-        case "staff":
-          navigate("/staffdashboard",);
-          break;
-        case "staffadvisor":
-          navigate("/staffadvisordashboard",);
-          break;
-        default:
-          console.log("Unknown role");
-          break;
+  
+      // If user data exists, proceed with authentication
+      if (userData) {
+        const { email, role } = userData;
+        localStorage.setItem("email", email);
+  
+        // Redirect based on user role
+        switch (role) {
+          case "admin":
+            navigate("/admindashboard");
+            break;
+          case "student":
+            navigate("/studentdashboard");
+            break;
+          case "staff":
+            navigate("/staffdashboard");
+            break;
+          case "staffadvisor":
+            navigate("/staffadvisordashboard");
+            break;
+          default:
+            console.log("Unknown role");
+            break;
+        }
+      } else {
+        // Handle invalid credentials
+        console.error("Invalid email or password");
       }
     } catch (error) {
       console.error("Authentication error:", error.message);
     }
   };
-
+  
 
   return (
     <div

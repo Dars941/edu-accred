@@ -1,189 +1,204 @@
-import { useState, useEffect } from "react";
-import * as XLSX from 'xlsx';
-import supabase  from '../../createClent'; // Import the Supabase client instance
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import HotTable from 'react-handsontable';
+import supabase from '../../createClent';
 
-function COmapping() {
-  // State variables
-  const [subject, setSubject] = useState('');
-  const [semester, setSemester] = useState('');
-  const [excelData, setExcelData] = useState([]);
-  const [typeError, setTypeError] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState(null);
+const Spreadsheet = () => {
+  const [data, setData] = useState([]);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [subjectOptions, setSubjectOptions] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [copopsoMapping, setCopoPsoMapping] = useState([]);
 
-  // Load Excel data from Supabase on component mount
   useEffect(() => {
-    fetchExcelData();
+    const fetchSpreadsheetData = async () => {
+      try {
+        const { data: spreadsheetData, error } = await supabase
+          .from('Co_Po_Pso_mapping')
+          .select();
+
+        if (error) {
+          throw error;
+        }
+
+        setData(spreadsheetData || []);
+      } catch (error) {
+        console.error('Error fetching spreadsheet data:', error.message);
+      }
+    };
+
+    fetchSpreadsheetData();
   }, []);
 
-  // Function to fetch Excel data from Supabase
-  const fetchExcelData = async () => {
+  useEffect(() => {
+    const fetchStaffDetails = async () => {
+      const email = localStorage.getItem("email");
+      setEmail(email);
+
+      try {
+        const { data, error } = await supabase
+          .from("stafflist")
+          .select("name")
+          .eq("email", email)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        setName(data.name);
+      } catch (error) {
+        console.error("Fetch name error:", error.message);
+      }
+    };
+
+    fetchStaffDetails();
+  }, []);
+
+  useEffect(() => {
+    if (name) {
+      fetchSubjectsByStaff(name);
+    }
+  }, [name]);
+
+  const fetchSubjectsByStaff = async (staffName) => {
     try {
-      const { data, error } = await supabase.from('excel_data').select('*');
-      if (error) {
-        console.error('Error fetching data from Supabase:', error.message);
-        setUploadStatus('Error fetching data. Please try again.');
+      const { data: subjectData, error: subjectError } = await supabase
+        .from("Subject")
+        .select("*")
+        .eq("staff", staffName);
+
+      if (subjectError) {
+        console.error(
+          "Error fetching subjects by staff:",
+          subjectError.message
+        );
       } else {
-        // Convert data to a format compatible with the UI
-        const formattedData = data.map(row => Object.values(row));
-        setExcelData(formattedData);
-        setUploadStatus(null);
+        setSubjectOptions(subjectData);
       }
     } catch (error) {
-      console.error('Error fetching data from Supabase:', error.message);
-      setUploadStatus('Error fetching data. Please try again.');
+      console.error("Error fetching subjects by staff:", error.message);
     }
   };
 
-  // Function to handle file upload
-  const handleFile = async (e) => {
-    const file = e.target.files[0];
-    
-    if (!file) return;
-
-    const fileType = file.name.split('.').pop().toLowerCase();
-    if (fileType !== 'xls' && fileType !== 'xlsx') {
-      setTypeError('Please select only Excel file types');
-      return;
-    }
-
+  const handleSubjectClick = async (subject) => {
+    setSelectedSubject(subject);
     try {
-      const data = await readFile(file);
-      // Convert data to a format compatible with the UI
-      const formattedData = data.map(row => Object.values(row));
-      setExcelData(formattedData);
-      setTypeError(null);
-      setUploadStatus(null);
+      const { data: mappingData, error: mappingError } = await supabase
+        .from('Co_Po_Pso_mapping')
+        .select()
+        .eq('subject_code', subject.code);
+
+      if (mappingError) {
+        throw mappingError;
+      }
+
+      setCopoPsoMapping(mappingData || []);
     } catch (error) {
-      console.error('Error reading file:', error);
-      setTypeError('Error reading file. Please try again.');
+      console.error('Error fetching CO-PO-SO mapping:', error.message);
     }
   };
 
-  // Function to read Excel file
-  const readFile = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const buffer = e.target.result;
-        const workbook = XLSX.read(buffer, { type: 'buffer' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        resolve(data);
-      };
-      reader.onerror = (error) => {
-        reject(error);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  };
-
-  // Function to update data in Supabase
-  const updateDataInSupabase = async () => {
+  const saveDataToSupabase = async () => {
     try {
-      // Convert data to Supabase format
-      const formattedData = excelData.map(row => {
-        const obj = {};
-        row.forEach((value, index) => {
-          obj[index.toString()] = value;
-        });
-        return obj;
-      });
+      const { error } = await supabase.from('Co_Po_Pso_mapping').upsert(data);
 
-      const { data, error } = await supabase.from('excel_data').upsert(formattedData);
       if (error) {
-        console.error('Error updating data in Supabase:', error.message);
-        setUploadStatus('Error updating data. Please try again.');
-      } else {
-        console.log('Data updated successfully:', data);
-        setUploadStatus('Data updated successfully.');
+        throw error;
       }
+
+      console.log('Data saved successfully');
     } catch (error) {
-      console.error('Error updating data in Supabase:', error.message);
-      setUploadStatus('Error updating data. Please try again.');
+      console.error('Error saving data to Supabase:', error.message);
     }
-  };
-
-  // Function to handle data editing
-  const handleDataEdit = (newValue, rowIndex, columnIndex) => {
-    const updatedData = excelData.map((row, index) => {
-      if (index === rowIndex) {
-        return row.map((cell, idx) => {
-          return idx === columnIndex ? newValue : cell;
-        });
-      }
-      return row;
-    });
-    setExcelData(updatedData);
-  };
-
-  // Function to handle subject input change
-  const handleSubjectChange = (e) => {
-    setSubject(e.target.value);
-  };
-
-  // Function to handle semester input change
-  const handleSemesterChange = (e) => {
-    setSemester(e.target.value);
-  };
-
-  // Function to handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Construct filename based on subject and semester
-    const fileName = `${subject}_${semester}.xlsx`;
-    // Call function to upload file with constructed filename
-    updateDataInSupabase();
   };
 
   return (
-    <div className="wrapper">
-      <h3 className="text-xl font-semibold">Upload CO mapping Excel</h3>
+    <div>
+      <div className="bg-blue-100 h-screen w-screen overflow-auto mr-2">
+        <h2 className="py-2 px-4 text-2xl font-bold bg-blue-100">
+          Subjects Taught by {name}
+        </h2>
 
-      {/* Subject input */}
-      <input type="text" value={subject} onChange={handleSubjectChange} placeholder="Enter subject" />
-
-      {/* Semester input */}
-      <input type="text" value={semester} onChange={handleSemesterChange} placeholder="Enter semester" />
-
-      {/* File upload input */}
-      <input type="file" className="form-control border rounded py-2 px-3 mr-2" required onChange={handleFile} />
-
-      {/* Error message for invalid file type */}
-      {typeError && <div className="alert alert-danger mt-2" role="alert">{typeError}</div>}
-
-      {/* Upload button */}
-      <button className="btn btn-primary mt-2" onClick={handleSubmit}>Update Supabase</button>
-
-      {/* Upload status */}
-      {uploadStatus && <div className="alert mt-2" role="alert">{uploadStatus}</div>}
-
-      {/* Display Excel data */}
-      <div className="viewer bg-gray-300 p-4 flex justify-center items-center">
-        <table className="table">
-          <thead>
-            <tr>
-              {excelData.length > 0 && excelData[0].map((header, index) => <th key={index}>{header}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {excelData.map((rowData, rowIndex) => (
-              <tr key={rowIndex}>
-                {rowData.map((cellData, cellIndex) => (
-                  <td key={cellIndex}>
-                    <input
-                      type="text"
-                      value={cellData}
-                      onChange={(e) => handleDataEdit(e.target.value, rowIndex, cellIndex)}
-                    />
-                  </td>
-                ))}
-              </tr>
+        <div className="flex flex-wrap rounded-[50%] px-[60px]">
+          {subjectOptions.length > 0 &&
+            subjectOptions.map((subject, index) => (
+              <div
+                key={index}
+                className="bg-blue-200 p-2 m-2 rounded cursor-pointer"
+                onClick={() => handleSubjectClick(subject)}
+              >
+                <div className="md:w-[25rem] h-[5rem] bg-white rounded-md shadow-lg hover:bg-red-200">
+                  <div className="flex justify-between px-4 py-2">
+                    <div className="flex flex-col my-3.5">
+                      <div className="text-[grey] text-xl"></div>
+                      <div className="text-blue-500 text-2xl">{subject.name}</div>
+                    </div>
+                    <div className="flex py-[10px]">
+                      <div className="w-[2.5rem] md:w-[2.5rem] h-[2.5rem] bg-light-blue rounded-[25%] text-center py-[5%]">
+                        -{`>`}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+        </div>
+
+        {/* CO-PO-SO Mapping Table */}
+        {selectedSubject && (
+          <div>
+            <h2 className="text-center  text-xl py-4 px-2  bg-blue-100">
+              CO-PO-SO Mapping for {selectedSubject.name}
+            </h2>
+            <div className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="px-8 py-4 font-semibold">ID</th>
+                    <th className="px-8 py-4 font-semibold">PO_1</th>
+                    <th className="px-8 py-4 font-semibold">PO_2</th>
+                    <th className="px-8 py-4 font-semibold">PO_3</th>
+                    <th className="px-8 py-4 font-semibold">PO_4</th>
+                    <th className="px-8 py-4 font-semibold">PO_5</th>
+                    <th className="px-8 py-4 font-semibold">PO_6</th>
+                    <th className="px-8 py-4 font-semibold">PO_7</th>
+                    <th className="px-8 py-4 font-semibold">PO_8</th>
+                    <th className="px-8 py-4 font-semibold">PO_9</th>
+                    <th className="px-8 py-4 font-semibold">PO_10</th>
+                    <th className="px-8 py-4 font-semibold">PSO_1</th>
+                    <th className="px-8 py-4 font-semibold">PSO_2</th>
+                    <th className="px-8 py-4 font-semibold">Subject Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {copopsoMapping.map((row, index) => (
+                    <tr key={index}>
+                      <td className="px-8 py-4">{row.id}</td>
+                      <td className="px-8 py-4">{row.PO_1}</td>
+                      <td className="px-8 py-4">{row.PO_2}</td>
+                      <td className="px-8 py-4">{row.PO_3}</td>
+                      <td className="px-8 py-4">{row.PO_4}</td>
+                      <td className="px-8 py-4">{row.PO_5}</td>
+                      <td className="px-8 py-4">{row.PO_6}</td>
+                      <td className="px-8 py-4">{row.PO_7}</td>
+                      <td className="px-8 py-4">{row.PO_8}</td>
+                      <td className="px-8 py-4">{row.PO_9}</td>
+                      <td className="px-8 py-4">{row.PO_10}</td>
+                      <td className="px-8 py-4">{row.PSO_1}</td>
+                      <td className="px-8 py-4">{row.PSO_2}</td>
+                      <td className="px-8 py-4">{row.subject_code}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
-export default COmapping;
+export default Spreadsheet;

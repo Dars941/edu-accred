@@ -34,6 +34,7 @@ import WelcomeStaff from './Components/StaffDashBoardItem/WelcomeStaff';
 import CoursePlanTable from './Components/StaffDashBoardItem/CoursePlan';
 import AttendenceRegister from './Components/StaffDashBoardItem/AttendenceRegister';
 import CourseOutcomeTable from './Components/StaffDashBoardItem/CourseOutcome';
+import CourseCoverage from './Components/StaffDashBoardItem/CourseCoverge';
 const App = () => {
   
   const ProtectedRoute = ({ children }) => {
@@ -97,6 +98,7 @@ const App = () => {
           <Route path="Series 2 Qp" element={<SeriesTwo />} />
           <Route path="TAE parameter" element={<TAE />} />
           <Route path="course plan" element={<CoursePlanTable />} />
+          <Route path="Course Coverage" element={<CourseCoverage/>} />
           <Route path="Attendence Register" element={<AttendenceRegister />} />
         </Route> 
         <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>

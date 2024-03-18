@@ -11,8 +11,8 @@ function CourseOutcomeTable() {
   const [name, setName] = useState("");
   const [subjectOptions, setSubjectOptions] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [courseOutcomes, setCourseOutcomes] = useState([]); 
-  
+  const [courseOutcomes, setCourseOutcomes] = useState([]);
+
   const [departments, setDepartments] = useState([]); // Add this line to define 'departments'
   const [newCourseOutcome, setNewCourseOutcome] = useState({
     name: "",
@@ -49,34 +49,72 @@ function CourseOutcomeTable() {
     }
   };
 
+  // const fetchDepartments = async () => {
+  //   try {
+  //     const { data: departmentsData, error: departmentsError } = await supabase
+  //       .from("studentlist")
+  //       .select("dept")
+  //       .distinct("dept");
+
+  //     if (departmentsError) {
+  //       console.error("Error fetching departments:", departmentsError.message);
+  //     } else {
+  //       setDepartments(departmentsData);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching departments:", error.message);
+  //   }
+  // }; 
   const fetchDepartments = async () => {
     try {
-      const { data: departmentsData, error: departmentsError } = await supabase
+      const { data: studentsData, error: studentsError } = await supabase
         .from("studentlist")
-        .select("dept")
-        .distinct("dept");
+        .select("dept");
 
-      if (departmentsError) {
-        console.error("Error fetching departments:", departmentsError.message);
+      if (studentsError) {
+        console.error("Error fetching departments:", studentsError.message);
       } else {
-        setDepartments(departmentsData);
+        // Extract unique departments from the fetched data
+        const uniqueDepartments = [
+          ...new Set(studentsData.map((student) => student.dept)),
+        ];
+        setDepartments(uniqueDepartments);
       }
     } catch (error) {
       console.error("Error fetching departments:", error.message);
     }
   };
 
+  // const fetchBatches = async () => {
+  //   try {
+  //     const { data: batchesData, error: batchesError } = await supabase
+  //       .from("studentlist")
+  //       .select("batch")
+  //       .distinct("batch");
+
+  //     if (batchesError) {
+  //       console.error("Error fetching batches:", batchesError.message);
+  //     } else {
+  //       setBatches(batchesData);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching batches:", error.message);
+  //   }
+  // }; 
   const fetchBatches = async () => {
     try {
-      const { data: batchesData, error: batchesError } = await supabase
+      const { data: studentsData, error: studentsError } = await supabase
         .from("studentlist")
-        .select("batch")
-        .distinct("batch");
+        .select("batch");
 
-      if (batchesError) {
-        console.error("Error fetching batches:", batchesError.message);
+      if (studentsError) {
+        console.error("Error fetching batches:", studentsError.message);
       } else {
-        setBatches(batchesData);
+        // Extract unique batches from the fetched data
+        const uniqueBatches = [
+          ...new Set(studentsData.map((student) => student.batch)),
+        ];
+        setBatches(uniqueBatches);
       }
     } catch (error) {
       console.error("Error fetching batches:", error.message);
@@ -190,7 +228,7 @@ function CourseOutcomeTable() {
     // Recalculate CO totals and percentages
     const co1Total =
       parseInt(newCourseOutcome.CO1_PART_A_Q1) +
-      parseInt(newCourseOutcome.CO1_PART_A_Q2) + 
+      parseInt(newCourseOutcome.CO1_PART_A_Q2) +
       parseInt(newCourseOutcome.CO1_PART_A_Q3) +
       parseInt(newCourseOutcome.CO1_PART_B_Q1) +
       parseInt(newCourseOutcome.CO1_PART_B_Q2);
@@ -266,7 +304,19 @@ function CourseOutcomeTable() {
       const { data: updatedCourseOutcomeData, error: updateError } =
         await supabase
           .from("course_outcomes_1")
-          .update(newCourseOutcome)
+          .update({
+            name: newCourseOutcome.name,
+            CO1_PART_A_Q1: newCourseOutcome.CO1_PART_A_Q1,
+            CO1_PART_A_Q2: newCourseOutcome.CO1_PART_A_Q2,
+            CO1_PART_A_Q3: newCourseOutcome.CO1_PART_A_Q3,
+            CO1_PART_B_Q1: newCourseOutcome.CO1_PART_B_Q1,
+            CO1_PART_B_Q2: newCourseOutcome.CO1_PART_B_Q2,
+            CO2_PART_A_Q1: newCourseOutcome.CO2_PART_A_Q1,
+            CO2_PART_A_Q2: newCourseOutcome.CO2_PART_A_Q2,
+            CO2_PART_A_Q3: newCourseOutcome.CO2_PART_A_Q3,
+            CO2_PART_B_Q1: newCourseOutcome.CO2_PART_B_Q1,
+            CO2_PART_B_Q2: newCourseOutcome.CO2_PART_B_Q2,
+          })
           .eq("id", editCourseOutcomeId);
 
       if (updateError) {
@@ -316,7 +366,26 @@ function CourseOutcomeTable() {
     const doc = new jsPDF();
 
     doc.autoTable({
-      head: [["ID", "Name", "CO1 Part A Q1", "CO1 Part A Q2", "CO1 Part A Q3", "CO1 Part B Q1", "CO1 Part B Q2", "CO2 Part A Q1", "CO2 Part A Q2", "CO2 Part A Q3", "CO2 Part B Q1", "CO2 Part B Q2",]],
+      head: [
+        [
+          "ID",
+          "Name",
+          "CO1 Part A Q1",
+          "CO1 Part A Q2",
+          "CO1 Part A Q3",
+          "CO1 Part B Q1",
+          "CO1 Part B Q2",
+          "CO2 Part A Q1",
+          "CO2 Part A Q2",
+          "CO2 Part A Q3",
+          "CO2 Part B Q1",
+          "CO2 Part B Q2",
+          "CO1 Total",
+          'CO1 %', 
+          "CO2 Total",
+          'CO2 %',
+        ],
+      ],
       body: courseOutcomes.map((courseOutcome) => [
         courseOutcome.id,
         courseOutcome.name,
@@ -330,6 +399,11 @@ function CourseOutcomeTable() {
         courseOutcome.CO2_PART_A_Q3,
         courseOutcome.CO2_PART_B_Q1,
         courseOutcome.CO2_PART_B_Q2,
+        courseOutcome.CO1_total,
+        courseOutcome.CO1_percentage,
+        courseOutcome.CO2_total,
+        courseOutcome.CO2_percentage,
+        
       ]),
     });
 
@@ -349,7 +423,9 @@ function CourseOutcomeTable() {
           >
             <option value="">Select Department</option>
             {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
             ))}
           </select>
         </div>
@@ -362,7 +438,9 @@ function CourseOutcomeTable() {
           >
             <option value="">Select Batch</option>
             {batches.map((batch) => (
-              <option key={batch} value={batch}>{batch}</option>
+              <option key={batch} value={batch}>
+                {batch}
+              </option>
             ))}
           </select>
         </div>
@@ -370,12 +448,16 @@ function CourseOutcomeTable() {
           <label>Student Name:</label>
           <select
             value={newCourseOutcome.name}
-            onChange={(e) => setNewCourseOutcome({ ...newCourseOutcome, name: e.target.value })}
+            onChange={(e) =>
+              setNewCourseOutcome({ ...newCourseOutcome, name: e.target.value })
+            }
             className="border rounded-lg px-3 py-2 mb-2 w-full"
           >
             <option value="">Select Student</option>
             {students.map((student) => (
-              <option key={student.id} value={student.name}>{student.name}</option>
+              <option key={student.id} value={student.name}>
+                {student.name}
+              </option>
             ))}
           </select>
         </div>
@@ -383,14 +465,14 @@ function CourseOutcomeTable() {
       <div className="flex mb-4">
         <div className="mr-4">
           <label>Subject:</label>
-          <div className="border rounded-lg px-3 py-2 mb-2 w-full">
+          <div className="px-[25rem] text-center  border rounded-lg  py-2 mb-2 w-full flex gap-5">
             {subjectOptions.map((subject) => (
               <div
                 key={subject.id}
                 onClick={() => handleSubjectClick(subject)}
                 className={`cursor-pointer ${
                   selectedSubject && selectedSubject.id === subject.id
-                    ? "bg-gray-200"
+                    ? "bg-blue-300"
                     : ""
                 }`}
               >
@@ -420,34 +502,98 @@ function CourseOutcomeTable() {
             <tr>
               <th className="border border-gray-300 px-4 py-2">ID</th>
               <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">CO1 Part A Q1</th>
-              <th className="border border-gray-300 px-4 py-2">CO1 Part A Q2</th>
-              <th className="border border-gray-300 px-4 py-2">CO1 Part A Q3</th>
-              <th className="border border-gray-300 px-4 py-2">CO1 Part B Q1</th>
-              <th className="border border-gray-300 px-4 py-2">CO1 Part B Q2</th>
-              <th className="border border-gray-300 px-4 py-2">CO2 Part A Q1</th>
-              <th className="border border-gray-300 px-4 py-2">CO2 Part A Q2</th>
-              <th className="border border-gray-300 px-4 py-2">CO2 Part A Q3</th>
-              <th className="border border-gray-300 px-4 py-2">CO2 Part B Q1</th>
-              <th className="border border-gray-300 px-4 py-2">CO2 Part B Q2</th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Part A Q1
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Part A Q2
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Part A Q3
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Part B Q1
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Part B Q2
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Part A Q1
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Part A Q2
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Part A Q3
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Part B Q1
+              </th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Part B Q2
+              </th>
+              <th className="border border-gray-300 px-4 py-2">CO1 Total</th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO1 Percentage
+              </th>
+              <th className="border border-gray-300 px-4 py-2">CO2 Total</th>
+              <th className="border border-gray-300 px-4 py-2">
+                CO2 Percentage
+              </th>
               <th className="border border-gray-300 px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {courseOutcomes.map((courseOutcome) => (
               <tr key={courseOutcome.id}>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.id}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO1_PART_A_Q1}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO1_PART_A_Q2}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO1_PART_A_Q3}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO1_PART_B_Q1}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO1_PART_B_Q2}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO2_PART_A_Q1}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO2_PART_A_Q2}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO2_PART_A_Q3}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO2_PART_B_Q1}</td>
-                <td className="border border-gray-300 px-4 py-2">{courseOutcome.CO2_PART_B_Q2}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.id}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.name}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_PART_A_Q1}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_PART_A_Q2}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_PART_A_Q3}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_PART_B_Q1}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_PART_B_Q2}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_PART_A_Q1}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_PART_A_Q2}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_PART_A_Q3}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_PART_B_Q1}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_PART_B_Q2}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_total}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO1_percentage}%
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_total}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {courseOutcome.CO2_percentage}%
+                </td>
                 <td className="border border-gray-300 px-4 py-2">
                   <button
                     onClick={() => handleEditClick(courseOutcome.id)}
@@ -470,117 +616,125 @@ function CourseOutcomeTable() {
       {showAddEditModal && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-8 rounded-lg">
-            <h2 className="text-lg font-semibold mb-4">Add/Edit Course Outcome</h2>
-            <form onSubmit={editCourseOutcomeId ? handleEditSubmit : addCourseOutcome}>
-              <div className="mb-4">
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newCourseOutcome.name}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO1 Part A Q1:</label>
-                <input
-                  type="number"
-                  name="CO1_PART_A_Q1"
-                  value={newCourseOutcome.CO1_PART_A_Q1}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO1 Part A Q2:</label>
-                <input
-                  type="number"
-                  name="CO1_PART_A_Q2"
-                  value={newCourseOutcome.CO1_PART_A_Q2}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO1 Part A Q3:</label>
-                <input
-                  type="number"
-                  name="CO1_PART_A_Q3"
-                  value={newCourseOutcome.CO1_PART_A_Q3}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO1 Part B Q1:</label>
-                <input
-                  type="number"
-                  name="CO1_PART_B_Q1"
-                  value={newCourseOutcome.CO1_PART_B_Q1}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO1 Part B Q2:</label>
-                <input
-                  type="number"
-                  name="CO1_PART_B_Q2"
-                  value={newCourseOutcome.CO1_PART_B_Q2}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO2 Part A Q1:</label>
-                <input
-                  type="number"
-                  name="CO2_PART_A_Q1"
-                  value={newCourseOutcome.CO2_PART_A_Q1}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO2 Part A Q2:</label>
-                <input
-                  type="number"
-                  name="CO2_PART_A_Q2"
-                  value={newCourseOutcome.CO2_PART_A_Q2}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO2 Part A Q3:</label>
-                <input
-                  type="number"
-                  name="CO2_PART_A_Q3"
-                  value={newCourseOutcome.CO2_PART_A_Q3}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO2 Part B Q1:</label>
-                <input
-                  type="number"
-                  name="CO2_PART_B_Q1"
-                  value={newCourseOutcome.CO2_PART_B_Q1}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-              <div className="mb-4">
-                <label>CO2 Part B Q2:</label>
-                <input
-                  type="number"
-                  name="CO2_PART_B_Q2"
-                  value={newCourseOutcome.CO2_PART_B_Q2}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-3 py-2 w-full"
-                />
+            <h2 className="text-lg font-semibold mb-4">
+              Add/Edit Course Outcome
+            </h2>
+            <form
+              onSubmit={
+                editCourseOutcomeId ? handleEditSubmit : addCourseOutcome
+              }
+            >
+              <div className="grid grid-cols-3">
+                <div className="mb-4">
+                  <label>Name:</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={newCourseOutcome.name}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO1 Part A Q1:</label>
+                  <input
+                    type="number"
+                    name="CO1_PART_A_Q1"
+                    value={newCourseOutcome.CO1_PART_A_Q1}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO1 Part A Q2:</label>
+                  <input
+                    type="number"
+                    name="CO1_PART_A_Q2"
+                    value={newCourseOutcome.CO1_PART_A_Q2}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO1 Part A Q3:</label>
+                  <input
+                    type="number"
+                    name="CO1_PART_A_Q3"
+                    value={newCourseOutcome.CO1_PART_A_Q3}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO1 Part B Q1:</label>
+                  <input
+                    type="number"
+                    name="CO1_PART_B_Q1"
+                    value={newCourseOutcome.CO1_PART_B_Q1}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO1 Part B Q2:</label>
+                  <input
+                    type="number"
+                    name="CO1_PART_B_Q2"
+                    value={newCourseOutcome.CO1_PART_B_Q2}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO2 Part A Q1:</label>
+                  <input
+                    type="number"
+                    name="CO2_PART_A_Q1"
+                    value={newCourseOutcome.CO2_PART_A_Q1}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO2 Part A Q2:</label>
+                  <input
+                    type="number"
+                    name="CO2_PART_A_Q2"
+                    value={newCourseOutcome.CO2_PART_A_Q2}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO2 Part A Q3:</label>
+                  <input
+                    type="number"
+                    name="CO2_PART_A_Q3"
+                    value={newCourseOutcome.CO2_PART_A_Q3}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO2 Part B Q1:</label>
+                  <input
+                    type="number"
+                    name="CO2_PART_B_Q1"
+                    value={newCourseOutcome.CO2_PART_B_Q1}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label>CO2 Part B Q2:</label>
+                  <input
+                    type="number"
+                    name="CO2_PART_B_Q2"
+                    value={newCourseOutcome.CO2_PART_B_Q2}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 w-full"
+                  />
+                </div>
               </div>
               <button
                 type="submit"

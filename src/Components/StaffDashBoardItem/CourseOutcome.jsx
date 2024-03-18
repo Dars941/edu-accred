@@ -472,8 +472,8 @@ function CourseOutcomeTable() {
                 onClick={() => handleSubjectClick(subject)}
                 className={`cursor-pointer ${
                   selectedSubject && selectedSubject.id === subject.id
-                    ? "bg-blue-300"
-                    : ""
+                    ? "bg-blue-300 py-4 px-2 round-lg"
+                    : "py-4 px-2 rounded-lg"
                 }`}
               >
                 {subject.name}
@@ -500,7 +500,7 @@ function CourseOutcomeTable() {
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="border border-gray-300 px-4 py-2">ID</th>
+              {/* <th className="border border-gray-300 px-4 py-2">ID</th> */}
               <th className="border border-gray-300 px-4 py-2">Name</th>
               <th className="border border-gray-300 px-4 py-2">
                 CO1 Part A Q1
@@ -546,9 +546,9 @@ function CourseOutcomeTable() {
           <tbody>
             {courseOutcomes.map((courseOutcome) => (
               <tr key={courseOutcome.id}>
-                <td className="border border-gray-300 px-4 py-2">
+                {/* <td className="border border-gray-300 px-4 py-2">
                   {courseOutcome.id}
-                </td>
+                </td> */}
                 <td className="border border-gray-300 px-4 py-2">
                   {courseOutcome.name}
                 </td>

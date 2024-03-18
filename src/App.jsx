@@ -63,7 +63,7 @@ const App = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<studentlist />} />
+          {/* <Route index element={<studentlist />} /> */}
           {/* <Route path="Mission Vision" element={<StaffAdvisor />} />  */}
 
           <Route path="staff" element={<Staff />} />

@@ -95,34 +95,38 @@ function AttendanceSystem() {
         .eq("subject_id", subjectId)
         .eq("date", date.toISOString().slice(0, 10)) // Convert date to ISO format and extract YYYY-MM-DD part
         .order("date", { ascending: false });
-
+  
       if (attendanceError) {
         throw attendanceError;
       }
-
+  
       // Extract student IDs from attendance data
       const studentIds = attendanceData.map(
         (attendance) => attendance.student_id
       );
-
-      // Fetch student names using the extracted student IDs
-      const { data: studentNames, error: studentError } = await supabase
+  
+      // Fetch students from the selected department
+      const { data: departmentStudents, error: studentError } = await supabase
         .from("studentlist")
         .select("id, name")
-        .in("id", studentIds);
-
+        .eq("dept", selectedDepartment);
+  
       if (studentError) {
         throw studentError;
       }
-
-      // Combine attendance data with student names
-      const updatedAttendanceData = attendanceData.map((attendance) => ({
-        ...attendance,
-        student_name: studentNames.find(
-          (student) => student.id === attendance.student_id
-        ).name,
-      }));
-
+  
+      // Combine attendance data with student names from the selected department
+      const updatedAttendanceData = departmentStudents.map((student) => {
+        const attendanceRecord = attendanceData.find(
+          (attendance) => attendance.student_id === student.id
+        );
+        return {
+          student_name: student.name,
+          status: attendanceRecord ? attendanceRecord.status : "AB", // Set status as "AB" (absent) if no attendance record found
+          date: attendanceRecord ? attendanceRecord.date : date.toISOString().slice(0, 10), // Use selected date if no attendance record found
+        };
+      });
+  
       setAttendanceData(updatedAttendanceData);
       setLoading(false);
     } catch (error) {
@@ -130,6 +134,8 @@ function AttendanceSystem() {
       setLoading(false);
     }
   };
+  
+  
 
   const fetchStudents = async (staffName, department, batch) => {
     try {
@@ -227,58 +233,58 @@ function AttendanceSystem() {
     }));
   };
 
-    const handleSubmitAttendance = async () => {
-      try {
-        setLoading(true);
-        const formattedAttendanceData = Object.keys(attendanceStatus).map(
-          (studentId) => ({
-            subject_id: selectedSubject.id,
-            student_id: studentId,
-            status: attendanceStatus[studentId],
-            date: new Date(), 
-          })
-        );
-    
-        const { data, error } = await supabase
-          .from("attendance")
-          .upsert(formattedAttendanceData);
-    
-        if (error) {
-          console.error("Error submitting attendance:", error.message);
-        } else {
-          console.log("Attendance submitted successfully:", data);
-          // Reset attendance status
-          setAttendanceStatus({});
-          // Fetch attendance data again to update the UI with the latest data
-          await fetchAttendanceForSubject(selectedSubject.id, selectedDate);
-        }
-      } catch (error) {
+  const handleSubmitAttendance = async () => {
+    try {
+      setLoading(true);
+      const formattedAttendanceData = Object.keys(attendanceStatus).map(
+        (studentId) => ({
+          subject_id: selectedSubject.id,
+          student_id: studentId,
+          status: attendanceStatus[studentId],
+          date: selectedDate.toISOString().slice(0, 10), // Use selectedDate for the date field
+        })
+      );
+  
+      const { data, error } = await supabase
+        .from("attendance")
+        .upsert(formattedAttendanceData);
+  
+      if (error) {
         console.error("Error submitting attendance:", error.message);
-      } finally {
-        setLoading(false);
+      } else {
+        console.log("Attendance submitted successfully:", data);
+        // Reset attendance status
+        setAttendanceStatus({});
+        // Fetch attendance data again to update the UI with the latest data
+        await fetchAttendanceForSubject(selectedSubject.id, selectedDate);
       }
-    };
-    
+    } catch (error) {
+      console.error("Error submitting attendance:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const handleFilter = () => {
     // Filter students based on selected department and batch
     let filteredStudents = students;
-  
+
     if (selectedDepartment) {
       filteredStudents = filteredStudents.filter(student => student.dept === selectedDepartment);
     }
-  
+
     if (selectedBatch) {
       filteredStudents = filteredStudents.filter(student => student.batch === selectedBatch);
     }
-  
+
     setFilteredStudents(filteredStudents);
   };
-  
+
 
   return (
-    
+
        <div className="h-screen w-screen overflow-auto mr-2">
-    
+
       <div>
         <label>Select Attendance Date:</label>
         <DatePicker selected={selectedDate} onChange={date => setSelectedDate(date)} />
@@ -349,7 +355,7 @@ function AttendanceSystem() {
               <div key={index} className="my-8 mx-4 py-4 px-2 flex bg-red-100 rounded-lg items-center justify-between">
               <div className="flex items-center">
                 <label className="mr-4">{student.name}</label>
-                
+
               </div>
               <input
                   type="checkbox"
@@ -363,7 +369,7 @@ function AttendanceSystem() {
                   }
                 />
             </div>
-            
+
             ))}
 
             <button className="py-2 px-1 bg-blue-200 rounded-lg" onClick={handleSubmitAttendance}>Submit Attendance</button> 
@@ -390,11 +396,11 @@ function AttendanceSystem() {
 {/* )} */}
 
 
-          
+
         </div>
       )}
 
-      
+
       <button onClick={handleFilter}>Apply Filters</button>
 
       {filteredStudents.length > 0 && (

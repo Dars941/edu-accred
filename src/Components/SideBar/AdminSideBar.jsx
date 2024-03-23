@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 const SideBar = () => {
   const [open, setOpen] = useState(true);
-  const [selectedItem, setSelectedItem] = useState('Mission Vision'); // Default selected item
+  const [selectedItem, setSelectedItem] = useState('users'); // Default selected item
   const navigate = useNavigate();
 
   const Menus = [
@@ -32,7 +32,7 @@ const SideBar = () => {
     <IoIosLogOut key="logout" />,
   ];
 
-  let containerClass = 'bg-light-red h-[600px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  let containerClass = 'bg-light-red h-[1024px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {

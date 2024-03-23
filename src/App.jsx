@@ -36,6 +36,9 @@ import AttendenceRegister from './Components/StaffDashBoardItem/AttendenceRegist
 import CourseOutcomeTable from './Components/StaffDashBoardItem/CourseOutcome';
 import CourseCoverage from './Components/StaffDashBoardItem/CourseCoverge'; 
 import Users from './Components/AdminDashBoardItem/users';
+import Timetable from './Components/StaffAdvisorDashBoardItem/Timetable';
+import Classroom from './Components/StaffAdvisorDashBoardItem/ClassroomCreate';
+import TimetableStaff from './Components/StaffDashBoardItem/TimetableStaff';
 const App = () => {
   
   const ProtectedRoute = ({ children }) => {
@@ -65,7 +68,7 @@ const App = () => {
         >
           {/* <Route index element={<studentlist />} /> */}
           {/* <Route path="Mission Vision" element={<StaffAdvisor />} />  */}
-
+          <Route index element={<Navigate to="users" />} />
           <Route path="staff" element={<Staff />} />
           <Route path="department" element={<Department />} />
           <Route path="student" element={<Student />} />
@@ -102,11 +105,14 @@ const App = () => {
           <Route path="course plan" element={<CoursePlanTable />} />
           <Route path="Course Coverage" element={<CourseCoverage/>} />
           <Route path="Attendence Register" element={<AttendenceRegister />} />
+          <Route path="Timetable" element={<TimetableStaff />} />
         </Route> 
         <Route path='staffadvisordashboard' element = {<StaffAdvisorDashBoard/>}>
         <Route index element={<Navigate to="student list " />} /> 
         <Route path="student list" element={<Studentliststaffadv />} />
         <Route path="create subject" element={<SubjectCreation />} />
+        <Route path="create timetable" element={<Timetable/>} />
+        <Route path="create classroom" element={<Classroom/>} />
         </Route>
 
         <Route path="logout" element={<Login />} />

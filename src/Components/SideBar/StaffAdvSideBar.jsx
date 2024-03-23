@@ -14,7 +14,9 @@ const SideBar = () => {
 
   const Menus = [
     { title: 'student list' }, 
+    { title: 'create classroom' }, 
     { title: 'create subject' }, 
+    { title: 'create timetable' }, 
     
     // { title: 'batch list' },
     // { title: 'department list' }, 
@@ -25,12 +27,12 @@ const SideBar = () => {
   const Icons = [
     <PiStudent key="student" />,
     <TiGroupOutline key='Staff'/>,
-    // <FcDepartment key='Department'/>,
+     <FcDepartment key='Department'/>,
     <IoIosLogOut key="logout" />,
     <RiDashboardFill key="dashboard" />,
   ];
 
-  let containerClass = 'bg-light-blue h-[600px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
+  let containerClass = 'bg-light-blue h-[1024px] p-5 pt-8 fixed top-0 left-0 overflow-y-auto';
   if (open) {
     containerClass += ' w-[17rem] max-h-screen';
   } else {

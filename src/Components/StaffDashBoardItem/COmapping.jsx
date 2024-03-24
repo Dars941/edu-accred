@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import HotTable from 'react-handsontable';
-import supabase from '../../createClent';
-import Subject from '../StudentDashBoardItem/Subject';
+import supabase from "../../createClent";
 
-const Spreadsheet = () => {
-  const [data, setData] = useState([]);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [subjectOptions, setSubjectOptions] = useState([]);
+const StaffDashboard = () => {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [courseOutcomes, setCourseOutcomes] = useState([]);
 
   useEffect(() => {
-    const email = localStorage.getItem("email");
-    setEmail(email);
+    const getEmail = localStorage.getItem("email");
+    setEmail(getEmail);
   }, []);
 
   useEffect(() => {
-    if (email) {
-      fetchName();
-    }
+    fetchName();
   }, [email]);
 
   useEffect(() => {
@@ -30,7 +25,7 @@ const Spreadsheet = () => {
 
   useEffect(() => {
     if (selectedSubject) {
-      fetchCoursePlansBySubject(selectedSubject.id);
+      fetchCourseOutcomes(selectedSubject);
     }
   }, [selectedSubject]);
 
@@ -56,126 +51,152 @@ const Spreadsheet = () => {
     try {
       const { data: subjectData, error: subjectError } = await supabase
         .from("Subject")
-        .select("*")
+        .select("name")
         .eq("staff", staffName);
+
       if (subjectError) {
-        console.error(
-          "Error fetching subjects by staff:",
-          subjectError.message
-        );
+        console.error("Error fetching subjects by staff:", subjectError.message);
       } else {
-        setSubjectOptions(subjectData);
+        setSubjects(subjectData);
       }
     } catch (error) {
       console.error("Error fetching subjects by staff:", error.message);
     }
   };
 
-  const fetchCoursePlansBySubject = async (subjectId) => {
+  const fetchCourseOutcomes = async (subject) => {
     try {
-      const { data: coursePlansData, error: coursePlansError } = await supabase
-        .from("Co_Po_Pso_mapping")
-        .select("*")
-        .eq("subject_id", subjectId);
+      const { data: coData, error: coError } = await supabase
+        .from("course_outcomes")
+        .select('*')
+        .eq("subject", subject);
 
-      if (coursePlansError) {
-        console.error(
-          "Error fetching course plans by subject:",
-          coursePlansError.message
-        );
+      if (coError) {
+        console.error("Error fetching course outcomes:", coError.message);
       } else {
-        setData(coursePlansData);
+        setCourseOutcomes(coData);
       }
     } catch (error) {
-      console.error("Error fetching course plans by subject:", error.message);
+      console.error("Error fetching course outcomes:", error.message);
     }
   };
 
-  const handleSubjectClick = (subject) => {
-    setSelectedSubject(subject);
-    fetchCoursePlansBySubject(subject.id);
+  const handleValueChange = async (courseCode, poNumber, newValue) => {
+    try {
+      setCourseOutcomes(prevCourseOutcomes => {
+        return prevCourseOutcomes.map(course => {
+          if (course.courseCode === courseCode) {
+            return {
+              ...course,
+              [poNumber]: newValue
+            };
+          }
+          return course;
+        });
+      });
+
+      await supabase
+        .from("course_outcomes")
+        .update({ [poNumber]: newValue })
+        .eq("subject", selectedSubject)
+        .eq("courseCode", courseCode);
+    } catch (error) {
+      console.error("Error updating course outcome value:", error.message);
+    }
   };
 
-  const saveDataToSupabase = async () => {
+  const handleJustificationChange = async (courseCode, poNumber, newJustification) => {
     try {
-      const { error } = await supabase.from('Co_Po_Pso_mapping').upsert(data);
-
-      if (error) {
-        throw error;
-      }
-
-      console.log('Data saved successfully');
+      await supabase
+        .from("course_outcomes")
+        .update({ [`${poNumber}_justification`]: newJustification })
+        .eq("subject", selectedSubject)
+        .eq("courseCode", courseCode);
     } catch (error) {
-      console.error('Error saving data to Supabase:', error.message);
+      console.error("Error updating course outcome justification:", error.message);
     }
   };
 
   return (
-    <div> 
-      <div className='py-4 px-2 text-3xl'>CO PO PSO mapping table </div>
-      <div className="flex flex-wrap rounded-[50%] px-[60px]">
-        {subjectOptions.length > 0 &&
-          subjectOptions.map((subject, index) => (
-            <div
-              key={index}
-              className="bg-blue-200 p-2 m-2 rounded cursor-pointer"
-              onClick={() => handleSubjectClick(subject)}
-            >
-              <div className="md:w-[25rem] h-[5rem] bg-white rounded-md shadow-lg hover:bg-red-200">
-                <div className="flex justify-between px-4 py-2">
-                  <div className="flex flex-col my-3.5">
-                    <div className="text-[grey] text-xl"></div>
-                    <div className="text-blue-500 text-2xl">{subject.name}</div>
-                  </div>
-                  <div className="flex py-[10px]">
-                    <div className="w-[2.5rem] md:w-[2.5rem] h-[2.5rem] bg-light-blue rounded-[25%] text-center py-[5%]">
-                      -{`>`}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            </div> 
-            
-          ))} 
-          
-      </div> 
-      
-      <button onClick={saveDataToSupabase}>Save Data</button> 
-      <HotTable
-        data={data}
-        colHeaders={[
-          'id',
-          'PO_1',
-          'PO_2',
-          'PO_3',
-          'PO_4',
-          'PO_5',
-          'PO_6',
-          'PO_7',
-          'PO_8',
-          'PO_9',
-          'PO_10',
-          'PSO_1',
-          'PSO_2',
-          'subject_id'
-        ]}
-        rowHeaders={true}
-        stretchH="all"
-        afterChange={(changes, source) => {
-          if (source === 'edit') {
-            const newData = data.map((row, rowIndex) => {
-              return row.map((cell, colIndex) => {
-                const change = changes.find(([r, c]) => r === rowIndex && c === colIndex);
-                return change ? change[3] : cell;
-              });
-            });
-            setData(newData);
-          }
-        }}
-      />
+    <div>
+      <h1>Welcome, {name}</h1>
+      <h2>Your Subjects:</h2>
+      <ul>
+        {subjects.map((subject, index) => (
+          <li key={index} onClick={() => setSelectedSubject(subject.name)}>
+            {subject.name}
+          </li>
+        ))}
+      </ul>
+      {selectedSubject && (
+        <>
+          <h2>Course Outcomes for {selectedSubject}:</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Course Code</th>
+                <th>PO1</th>
+                <th>PO2</th>
+                <th>PO3</th>
+                <th>PO4</th>
+                <th>PO5</th>
+                <th>PO6</th>
+                <th>PO7</th>
+                <th>PO8</th>
+                <th>PO9</th>
+                <th>PO10</th>
+                <th>PO11</th>
+                <th>PO12</th>
+                <th>PSO1</th>
+                <th>PSO2</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courseOutcomes.map((course) => (
+                <tr key={course.id}>
+                  <td>{course.courseCode}</td>
+                  <td>
+                    <input
+                      type="text"
+                      value={course.PO1}
+                      onChange={(e) => handleValueChange(course.courseCode, 'PO1', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={course.PO2}
+                      onChange={(e) => handleValueChange(course.courseCode, 'PO2', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={course.PO3}
+                      onChange={(e) => handleValueChange(course.courseCode, 'PO3', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <textarea
+                      value={course.PO1_justification}
+                      onChange={(e) => handleJustificationChange(course.courseCode, 'PO1', e.target.value)}
+                    />
+                  </td>
+                  <td>
+                    <textarea
+                      value={course.PO2_justification}
+                      onChange={(e) => handleJustificationChange(course.courseCode, 'PO2', e.target.value)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </div>
   );
 };
 
-export default Spreadsheet;
+export default StaffDashboard;

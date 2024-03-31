@@ -18,35 +18,42 @@ function CoursePlanTable() {
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [editCoursePlanId, setEditCoursePlanId] = useState(null);
   const generatePDF = () => {
-    // Create a new jsPDF instance
     const doc = new jsPDF();
   
-    // Define the header for the PDF
-    const header = 'Course Plans for ' + selectedSubject.name;
-    
-    // Define the data for the table
-    const data = [];
-    coursePlans.forEach((plan, index) => {
-      const rowData = [
-        index + 1,
-        plan.date,
-        plan.hours,
-        plan.topics_to_cover
-      ];
-      data.push(rowData);
+    doc.text("Time Table", 10, 10);
+  
+    // Prepare table headers
+    const tableHeaders = ['Day', 'Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5', 'Period 6', 'Period 7'];
+  
+    // Create table data
+    const tableData = [];
+  
+    days.forEach((day, rowIndex) => {
+      const row = [day]; // Start with the day name
+  
+      Array.from({ length: 7 }).forEach((_, colIndex) => {
+        const subject =
+          timetables[selectedClassroom.id] &&
+          timetables[selectedClassroom.id][day] &&
+          timetables[selectedClassroom.id][day][colIndex]
+            ? timetables[selectedClassroom.id][day][colIndex]
+            : "";
+        row.push(subject); // Add the subject for each period
+      });
+  
+      tableData.push(row); // Add the completed row to the table data
     });
   
-    // Set the header and table data
-    doc.text(header, 10, 10);
+    // Generate the table using autoTable
     doc.autoTable({
       startY: 20,
-      head: [['No', 'Date', 'Hours', 'Topics to be Covered']],
-      body: data
+      head: tableHeaders,
+      body: tableData
     });
   
-    // Save the PDF
-    doc.save('course_plans.pdf');
+    doc.save("timetable.pdf");
   };
+  
   
   useEffect(() => {
     const email = localStorage.getItem("email");

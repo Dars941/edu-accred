@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import supabase from '../../createClent';
 import * as XLSX from 'xlsx';
-
+import jsPDF from 'jspdf';
 const StudentList = () => {
   const [fetchError, setFetchError] = useState(null);
   const [studentList, setStudentList] = useState([]);
@@ -146,6 +146,17 @@ const StudentList = () => {
     } catch (error) {
       console.error('Error adding/editing student:', error.message);
     }
+  }; 
+  
+  const handleGeneratePDF = () => {
+    const doc = new jsPDF();
+
+    // Set up table headers
+    doc.text('Student List', 10, 10);
+    doc.autoTable({ html: '#studentTable' });
+
+    // Save PDF
+    doc.save('student_list.pdf');
   };
 
   const handleBulkAdd = async (e) => {
@@ -183,36 +194,47 @@ const StudentList = () => {
   return (
     <div className='p-7 text-2xl text-black bg-blue-100 w-full font-semibold overflow-x-auto'>
       <h2>Student List</h2>
-      <button
-        onClick={() => handleEdit({}, true)}
-        className="bg-text-hover-color w-[60px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
-      >
-        Add
-      </button> 
-      <div style={{ position: 'relative', display: 'inline-block' ,margin:'2' }}>
-  <input
-    id="fileInput"
-    type="file"
-    accept=".xlsx, .xls"
-    onChange={handleBulkAdd}
-    style={{ position: 'absolute', top: 0, left: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-  />
+      <div className="flex gap-2">
   <button
-    className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg mt-1 text-center p-2 text-[20px] text-white font-normal"
-    onClick={() => document.getElementById('fileInput').click()}
+    onClick={() => handleEdit({}, true)}
+    className="bg-text-hover-color w-[60px] h-[40px] rounded-lg text-[20px] text-white font-normal"
   >
-    Bulk
+    Add
+  </button>
+  
+  <div style={{ position: 'relative', display: 'inline-block' }}>
+    <input
+      id="fileInput"
+      type="file"
+      accept=".xlsx, .xls"
+      onChange={handleBulkAdd}
+      style={{ position: 'absolute', top: 0, left: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+    />
+    <button
+      className="px-2 bg-text-hover-color w-[100px] h-[40px] rounded-lg text-[20px] text-white font-normal"
+      onClick={() => document.getElementById('fileInput').click()}
+    >
+      Bulk
+    </button>
+  </div>
+
+  <button
+    onClick={handleGeneratePDF}
+    className="bg-text-hover-color w-[120px] h-[40px] rounded-lg text-[20px] text-white font-normal"
+  >
+    Generate PDF
   </button>
 </div>
 
+
       
       {fetchError && <p>{fetchError}</p>}
-      <table className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
+      <table  id="studentTable" className="pl-[10px] text-left table-auto bg-white border w-full rounded-[25px] shadow-lg">
         <thead className="rounded-lg">
           <tr className="rounded-lg">
             <th className="px-4 py-2 font-semibold ">Name</th>
             <th className="px-4 py-2 font-semibold">Registration Number</th>
-            <th className="px-4 py-2 font-semibold">Admission Number</th>
+            {/* <th className="px-4 py-2 font-semibold">Admission Number</th>
             <th className="px-4 py-2 font-semibold">Gender</th>
             <th className="px-4 py-2 font-semibold">Physics</th>
             <th className="px-4 py-2 font-semibold">Chemistry</th>
@@ -223,7 +245,7 @@ const StudentList = () => {
             <th className="px-4 py-2 font-semibold">College Rank</th>
             <th className="px-4 py-2 font-semibold">Proof</th>
             <th className="px-4 py-2 font-semibold">Remark</th>
-            <th className="px-4 py-2 font-semibold">Batch</th>
+            <th className="px-4 py-2 font-semibold">Batch</th> */}
             <th className="px-4 py-2 font-semibold">Department</th>
             <th className="px-4 py-2 font-semibold">Action</th>
           </tr>
@@ -233,7 +255,7 @@ const StudentList = () => {
             <tr key={student.id} className={index % 2 === 0 ? 'bg-text-hover-bg' : ''}>
               <td className="px-4 py-2 font-light text-[20px]">{student.name}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.reg_no}</td>
-              <td className="px-4 py-2 font-light text-[20px]">{student.admission_no}</td>
+              {/* <td className="px-4 py-2 font-light text-[20px]">{student.admission_no}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.gender}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.physics}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.chemistry}</td>
@@ -244,7 +266,7 @@ const StudentList = () => {
               <td className="px-4 py-2 font-light text-[20px]">{student.clg_rank}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.proof}</td>
               <td className="px-4 py-2 font-light text-[20px]">{student.remark}</td>
-              <td className="px-4 py-2 font-light text-[20px]">{student.batch}</td>
+              <td className="px-4 py-2 font-light text-[20px]">{student.batch}</td> */}
               <td className="px-4 py-2 font-light text-[20px]">{student.dept}</td>
               <td className="px-4 py-2 flex gap-6">
                 <button className="mr-2" onClick={() => handleEdit(student)}>
@@ -282,7 +304,7 @@ const StudentList = () => {
                 value={selectedStudent.reg_no}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, reg_no: e.target.value })}
               />
-              <input
+              {/* <input
                 type="text"
                 placeholder="Admission Number"
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
@@ -358,7 +380,7 @@ const StudentList = () => {
                 className="border rounded-lg px-3 py-2 mb-2 w-full"
                 value={selectedStudent.remark}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, remark: e.target.value })}
-              />
+              /> */}
               {/* <input
                 type="text"
                 placeholder="Batch"
@@ -366,7 +388,7 @@ const StudentList = () => {
                 value={selectedStudent.batch}
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, batch: e.target.value })}
               /> */} 
-               <select
+               {/* <select
                 value={selectedStudent.batch} 
                 placeholder="Advisor batch "
                 onChange={(e) => setSelectedStudent({ ...selectedStudent, batch: e.target.value })}
@@ -378,14 +400,8 @@ const StudentList = () => {
                 <option value="2022-2026">2022-2026</option>
                 <option value="2023-2027">2023-2027</option>
 
-              </select>
-              {/* <input
-                type="text"
-                placeholder="Department"
-                className="border rounded-lg px-3 py-2 mb-2 w-full"
-                value={selectedStudent.dept}
-                onChange={(e) => setSelectedStudent({ ...selectedStudent, dept: e.target.value })}
-              /> */} 
+              </select> */}
+             
               <select
                 value={selectedStudent.dept} 
                 placeholder="Department "

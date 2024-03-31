@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import supabase from "../../createClent";
+import jsPDF from "jspdf";
 
 const TimeTable = () => {
   const [department, setDepartment] = useState("");
@@ -188,6 +189,37 @@ const TimeTable = () => {
     setSelectedClassroom(classroom);
   };
 
+ 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+  
+    // Set up table headers
+    doc.autoTable({
+      startY: 20,
+      head: [['Days', 'Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5', 'Period 6', 'Period 7']],
+    });
+  
+    // Iterate over days and periods to add timetable data to the PDF
+    days.forEach((day, rowIndex) => {
+      const rowData = [day];
+      for (let i = 0; i < 7; i++) {
+        const subject =
+          timetables[selectedClassroom.id] &&
+          timetables[selectedClassroom.id][day] &&
+          timetables[selectedClassroom.id][day][i] !== undefined // Ensure the value is not undefined
+            ? timetables[selectedClassroom.id][day][i] // Use the retrieved value
+            : "";
+        rowData.push(subject);
+      }
+      doc.autoTable({
+        startY: 30 + rowIndex * 10, // Adjusted vertical position based on the row index
+        body: [rowData],
+      });
+    })
+  
+    doc.save("timetable.pdf");
+};
+
   return (
     <div className="p-7 text-2xl text-black bg-blue-100 w-full font-semibold">
       <h2>Time Table for {name}</h2>
@@ -206,18 +238,18 @@ const TimeTable = () => {
         <div className="mt-8">
           <h3>Time Table for {selectedClassroom.name}</h3>
           <div className="overflow-x-auto">
-            <table className="border-collapse border border-gray-800 mt-4 w-full">
+            <table  className="border-collapse border border-gray-800 mt-4 w-full">
               <thead>
                 <tr>
                   <th className="border border-gray-800 px-2 py-1">Day</th>
-                  {Array.from({ length: 7 }).map((_, index)                    => (
-                      <th
-                        key={index}
-                        className="border border-gray-800 px-2 py-1"
-                      >
-                        Period {index + 1}
-                      </th>
-                    ))}
+                  {Array.from({ length: 7 }).map((_, index) => (
+                    <th
+                      key={index}
+                      className="border border-gray-800 px-2 py-1"
+                    >
+                      Period {index + 1}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -225,31 +257,30 @@ const TimeTable = () => {
                   <tr key={day}>
                     <td className="border border-gray-800 px-2 py-1">{day}</td>
                     {Array.from({ length: 7 }).map((_, index) => (
-  <td
-    key={`${day}-${index}`}
-    className="border border-gray-800 px-2 py-1"
-  >
-    <input
-      type="text"
-      value={
-        (timetables[selectedClassroom.id] &&
-          timetables[selectedClassroom.id][day] &&
-          timetables[selectedClassroom.id][day][index]) ||
-        ''
-      }
-      onChange={(event) =>
-        handleInputChange(
-          event,
-          selectedClassroom.id,
-          day,
-          index
-        )
-      }
-      className="w-full h-full"
-    />
-  </td>
-))}
-
+                      <td
+                        key={`${day}-${index}`}
+                        className="border border-gray-800 px-2 py-1"
+                      >
+                        <input
+                          type="text"
+                          value={
+                            (timetables[selectedClassroom.id] &&
+                              timetables[selectedClassroom.id][day] &&
+                              timetables[selectedClassroom.id][day][index]) ||
+                            ""
+                          }
+                          onChange={(event) =>
+                            handleInputChange(
+                              event,
+                              selectedClassroom.id,
+                              day,
+                              index
+                            )
+                          }
+                          className="w-full h-full"
+                        />
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -261,6 +292,12 @@ const TimeTable = () => {
           >
             Save
           </button>
+          <button
+            className="mt-4 ml-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+            onClick={generatePDF}
+          >
+            Generate PDF
+          </button>
         </div>
       )}
     </div>
@@ -268,4 +305,3 @@ const TimeTable = () => {
 };
 
 export default TimeTable;
-

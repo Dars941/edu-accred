@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import supabase from "../../createClent";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
+import DatePicker from "react-datepicker";
 
 function CoursePlanTable() {
   const [email, setEmail] = useState("");
@@ -11,47 +11,41 @@ function CoursePlanTable() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [coursePlans, setCoursePlans] = useState([]);
   const [newCoursePlan, setNewCoursePlan] = useState({
-    date: "",
+    date: new Date(),
     hours: "",
     topics_to_cover: "",
   });
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [editCoursePlanId, setEditCoursePlanId] = useState(null);
   const generatePDF = () => {
+    // Create a new jsPDF instance
     const doc = new jsPDF();
   
-    doc.text("Time Table", 10, 10);
-  
-    // Prepare table headers
-    const tableHeaders = ['Day', 'Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5', 'Period 6', 'Period 7'];
-  
-    // Create table data
-    const tableData = [];
-  
-    days.forEach((day, rowIndex) => {
-      const row = [day]; // Start with the day name
-  
-      Array.from({ length: 7 }).forEach((_, colIndex) => {
-        const subject =
-          timetables[selectedClassroom.id] &&
-          timetables[selectedClassroom.id][day] &&
-          timetables[selectedClassroom.id][day][colIndex]
-            ? timetables[selectedClassroom.id][day][colIndex]
-            : "";
-        row.push(subject); // Add the subject for each period
-      });
-  
-      tableData.push(row); // Add the completed row to the table data
+    // Define the header for the PDF
+    const header = 'Course Plan for ' + selectedSubject.name;
+    
+    // Define the data for the table
+    const data = [];
+    coursePlans.forEach((plan, index) => {
+      const rowData = [
+        index + 1,
+        plan.date,
+        plan.hours,
+        plan.topics_to_cover
+      ];
+      data.push(rowData);
     });
   
-    // Generate the table using autoTable
+    // Set the header and table data
+    doc.text(header, 10, 10);
     doc.autoTable({
       startY: 20,
-      head: tableHeaders,
-      body: tableData
+      head: [['No', 'Date', 'Hr taken by staff', 'Topics to be Covered']],
+      body: data
     });
   
-    doc.save("timetable.pdf");
+    // Save the PDF
+    doc.save('course_coverage.pdf');
   };
   
   
@@ -94,7 +88,9 @@ function CoursePlanTable() {
       console.error("Fetch name error:", error.message);
     }
   };
-
+  const handleDateChange = (date) => {
+    setNewCoursePlan({ ...newCoursePlan, date });
+  };
   const fetchSubjectsByStaff = async (staffName) => {
     try {
       const { data: subjectData, error: subjectError } = await supabase
@@ -197,7 +193,7 @@ function CoursePlanTable() {
     try {
       const updatedPlan = {
         id: editCoursePlanId, // The ID of the course plan to be edited
-        date: newCoursePlan.date,
+        date: new Date(),
         hours: newCoursePlan.hours,
         topics_to_cover: newCoursePlan.topics_to_cover,
       };
@@ -288,7 +284,7 @@ function CoursePlanTable() {
               <tr className="rounded-lg">
                 <th className="px-8 py-4 font-semibold">No</th>
                 <th className="px-8 py-4 font-semibold">Date</th>
-                <th className="px-8 py-4 font-semibold">Hours</th>
+                <th className="px-8 py-4 font-semibold">Hr taken by staff</th>
                 <th className="px-8 py-4 font-semibold">
                   Topics to be covered
                 </th>
@@ -340,13 +336,11 @@ function CoursePlanTable() {
             </h2>
             {/* Form for adding/editing course plan */}
             <form onSubmit={editCoursePlanId ? editCoursePlan : addCoursePlan}>
-              <div>
+            <div>
                 <label>Date:</label>
-                <input
-                  type="text"
-                  name="date"
-                  value={newCoursePlan.date}
-                  onChange={handleInputChange}
+                <DatePicker
+                  selected={newCoursePlan.date}
+                  onChange={handleDateChange}
                   className="border rounded-lg px-3 py-2 mb-2 w-full"
                 />
               </div>

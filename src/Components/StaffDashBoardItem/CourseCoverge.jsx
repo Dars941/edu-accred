@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import supabase from "../../createClent";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
+import DatePicker from "react-datepicker"; // Import DatePicker component
 
 function CoursePlanTable() {
   const [email, setEmail] = useState("");
@@ -11,7 +11,7 @@ function CoursePlanTable() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [coursePlans, setCoursePlans] = useState([]);
   const [newCoursePlan, setNewCoursePlan] = useState({
-    date: "",
+    date: new Date(), // Initialize date with current date
     hours: "",
     topics_to_cover: "",
   });
@@ -40,7 +40,7 @@ function CoursePlanTable() {
     doc.text(header, 10, 10);
     doc.autoTable({
       startY: 20,
-      head: [['No', 'Date', 'Hours', 'Topics to be Covered']],
+      head: [['No', 'Date', 'Hr taken by staff', 'Topics to be Covered']],
       body: data
     });
   
@@ -137,6 +137,10 @@ function CoursePlanTable() {
     setNewCoursePlan({ ...newCoursePlan, [name]: value });
   };
 
+  const handleDateChange = (date) => {
+    setNewCoursePlan({ ...newCoursePlan, date });
+  };
+
   const addCoursePlan = async (event) => {
     event.preventDefault();
     try {
@@ -157,7 +161,7 @@ function CoursePlanTable() {
         console.log("Successfully added course plan:", newCoursePlanData);
         setCoursePlans([...coursePlans, newCoursePlanData[0]]);
         setNewCoursePlan({
-          date: "",
+          date: new Date(), // Reset date to current date
           hours: "",
           topics_to_cover: "",
         });
@@ -261,7 +265,7 @@ function CoursePlanTable() {
               setShowAddEditModal(true);
               setEditCoursePlanId(null); // Reset edit ID
               setNewCoursePlan({
-                date: "",
+                date: new Date(), // Reset date to current date
                 hours: "",
                 topics_to_cover: "",
               });
@@ -281,7 +285,7 @@ function CoursePlanTable() {
               <tr className="rounded-lg">
                 <th className="px-8 py-4 font-semibold">No</th>
                 <th className="px-8 py-4 font-semibold">Date</th>
-                <th className="px-8 py-4 font-semibold">Hours</th>
+                <th className="px-8 py-4 font-semibold">Hr taken by staff</th>
                 <th className="px-8 py-4 font-semibold">
                   Topics to be covered
                 </th>
@@ -335,11 +339,9 @@ function CoursePlanTable() {
             <form onSubmit={editCoursePlanId ? editCoursePlan : addCoursePlan}>
               <div>
                 <label>Date:</label>
-                <input
-                  type="text"
-                  name="date"
-                  value={newCoursePlan.date}
-                  onChange={handleInputChange}
+                <DatePicker
+                  selected={newCoursePlan.date}
+                  onChange={handleDateChange}
                   className="border rounded-lg px-3 py-2 mb-2 w-full"
                 />
               </div>
@@ -370,7 +372,7 @@ function CoursePlanTable() {
                     setShowAddEditModal(false);
                     setEditCoursePlanId(null); // Reset edit ID
                     setNewCoursePlan({
-                      date: "",
+                      date: new Date(), // Reset date to current date
                       hours: "",
                       topics_to_cover: "",
                     });
